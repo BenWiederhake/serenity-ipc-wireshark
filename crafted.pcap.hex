@@ -1,0 +1,30 @@
+# === PCAP header
+# Magic (little endian)
+h D4 C3 B2 A1
+# Version major an minor
+h 02 00 04 00
+# Pointless timestamps
+h 00 00 00 00  00 00 00 00
+# "snaplen"
+h 00 00 04 00
+# Linktype, let's use, uhhh … dunno, LINKTYPE_USER13 should be fine. That's 160.
+h a0 00 00 00
+
+# === Dummy packet:
+# timeval (u32 sec, u32 usec)
+h 60e56064 01000000
+# length must effectively be provided twice. 24=0x18
+h 19 00 00 00
+h 19 00 00 00
+# Data
+utf8 Hello, World!!!111eleven!
+
+# === Dummy packet:
+# timeval (u32 sec, u32 usec)
+h 00000000 00000000
+# length must effectively be provided twice. 24=0x18
+h 00 00 00 00
+h 00 00 00 00
+# Data
+# None
+
