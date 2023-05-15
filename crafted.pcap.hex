@@ -12,8 +12,8 @@ h a0 00 00 00
 
 # === Dummy packet:
 # timeval (u32 sec, u32 usec)
-h 60e56064 01000000
-# length must effectively be provided twice. 24=0x18
+h 60e56064 00000000
+# length must effectively be provided twice. 25=0x19
 h 19 00 00 00
 h 19 00 00 00
 # Data
@@ -21,10 +21,9 @@ utf8 Hello, World!!!111eleven!
 
 # === Dummy packet:
 # timeval (u32 sec, u32 usec)
-h 00000000 00000000
-# length must effectively be provided twice. 24=0x18
-h 00 00 00 00
-h 00 00 00 00
+h 6ae56064 00000000
+# length must effectively be provided twice. 22=0x16
+h 16 00 00 00
+h 16 00 00 00
 # Data
-# None
-
+utf8 How are you today? :^)
