@@ -26,14 +26,7 @@ do
     -- })
     -- endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
     -- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
-    -- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
-    --
-    -- local tab_message_type_1419546126 = {
-    --     [2] = "FooBarThing",
-    -- }
-    -- f.ep_1419546126_type = ProtoField.uint32("ipc.msg.msg_type", "FooBar Message Type (enum)", base.DEC, tab_message_type_1419546126)
-    -- endpoint_info[1419546126] = {type_field=f.ep_1419546126_type, types={}}
-
+    -- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, parameters={}}
 
     function IPC.dissector(buf, pinfo, tree)
         -- Parse direction
@@ -70,7 +63,7 @@ do
         local buf = buf(4)
         local message = message_tree:add(message_ctx.type_field, buf)
 
-        -- FIXME: Parse 'message' according to 'message_ctx.inputs'
+        -- FIXME: Parse 'message' according to 'message_ctx.parameters'
     end
 
     DissectorTable.get("wtap_encap"):add(wtap.USER13, IPC)

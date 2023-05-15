@@ -36,7 +36,7 @@ def generate_endpoint_fields_and_context(ipc_data):
         lines.append(f'    f.ep_{endpoint["magic"]}_type = ProtoField.uint32("ipc.msg.msg_type", "{endpoint["name"]} Message Type (enum)", base.DEC, {{')
 
         #--     [2] = "NotifyChangedI32Value",
-        for msg_idx_zero, message in enumerate(endpoint["messages"]):
+        for msg_idx_zero, message in enumerate(endpoint["messages"]):  # FIXME: Use half-messages!
             msg_idx_serenity = msg_idx_zero + 1
             lines.append(f'        [{msg_idx_serenity}] = "{camel_casify(message["name"])}",')
 
@@ -48,7 +48,7 @@ def generate_endpoint_fields_and_context(ipc_data):
 
         #-- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_content", "ConfigClient::NotifyChangedI32Value")
         #-- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
-        for msg_idx_zero, message in enumerate(endpoint["messages"]):
+        for msg_idx_zero, message in enumerate(endpoint["messages"]):  # FIXME: Use half-messages!
             msg_idx_serenity = msg_idx_zero + 1
             # The generated name is completely fictional, but it's a bit shorter than the snake_case name, and everyone should be able to immediately understand it.
             lines.append(f'    f.ep_{endpoint["magic"]}_{msg_idx_serenity}_content = ProtoField.bytes("ipc.msg.msg_content", "{endpoint["name"]}::{camel_casify(message["name"])}")')
