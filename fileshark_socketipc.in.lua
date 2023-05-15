@@ -7,37 +7,7 @@ do
     }
 
     local tab_endpoints = {
-        [2714249765] = "NotificationServer.ipc",
-        [1502652576] = "RequestClient.ipc",
-        [1270977860] = "RequestServer.ipc",
-        [2565717604] = "WebContentClient.ipc",
-        [4289017466] = "WebContentServer.ipc",
-        [2244075654] = "WebDriverServer.ipc",
-        [4284153835] = "WebDriverClient.ipc",
-        [3887509455] = "AudioServer.ipc",
-        [1126638765] = "AudioClient.ipc",
-        [945471142] = "ImageDecoderClient.ipc",
-        [3964467294] = "ImageDecoderServer.ipc",
-        [531353361] = "SQLClient.ipc",
-        [3731107876] = "SQLServer.ipc",
-        [3157685592] = "WebSocketClient.ipc",
-        [1144104864] = "WebSocketServer.ipc",
-        [3613307456] = "LookupServer.ipc",
-        [3540717142] = "LookupClient.ipc",
-        [3317521970] = "WindowManagerClient.ipc",
-        [471012077] = "WindowManagerServer.ipc",
-        [2938215075] = "WindowServer.ipc",
-        [3794023488] = "WindowClient.ipc",
-        [4008793515] = "ClipboardClient.ipc",
-        [1329211611] = "ClipboardServer.ipc",
-        [729082329] = "FileSystemAccessServer.ipc",
-        [3747304165] = "FileSystemAccessClient.ipc",
-        [1706997054] = "LaunchClient.ipc",
-        [1140813104] = "LaunchServer.ipc",
-        [1419546125] = "ConfigClient.ipc",
-        [252595060] = "ConfigServer.ipc",
-        [3294800782] = "LanguageServer.ipc",
-        [114752332] = "LanguageClient.ipc",
+        --AUTOGENERATE:TABLE_ENDPOINTS
         -- Example:
         -- [1419546125] = "ConfigClient.ipc",
     }
