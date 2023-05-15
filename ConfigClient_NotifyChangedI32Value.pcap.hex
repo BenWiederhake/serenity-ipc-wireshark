@@ -13,12 +13,14 @@ h a0 00 00 00
 # === Sample packet:
 # timeval (u32 sec, u32 usec)
 h 00000000 00000000
-# length must effectively be provided twice. 25=0x19
-h 35 00 00 00
-h 35 00 00 00
+# length must effectively be provided twice.
+h 32 00 00 00
+h 32 00 00 00
 # - Data: ConfigClient::NotifyChangedI32Value
-# IPC Packet size
-h 31 00 00 00
+# We drop the IPC packet size, and instead encode whether this is an incoming our outgoing packet.
+# P2P_DIR_SENT    =  0
+# P2P_DIR_RECV    =  1
+h 01
 # Endpoint: ConfigClient
 h 0d 8e 9c 54
 # Message: NotifyChangedI32Value
