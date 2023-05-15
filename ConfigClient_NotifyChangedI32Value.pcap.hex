@@ -1,0 +1,37 @@
+# === PCAP header
+# Magic (little endian)
+h D4 C3 B2 A1
+# Version major an minor
+h 02 00 04 00
+# Pointless timestamps
+h 00 00 00 00  00 00 00 00
+# "snaplen"
+h 00 00 04 00
+# Linktype, let's use, uhhh … dunno, LINKTYPE_USER13 should be fine. That's 160.
+h a0 00 00 00
+
+# === Sample packet:
+# timeval (u32 sec, u32 usec)
+h 00000000 00000000
+# length must effectively be provided twice. 25=0x19
+h 35 00 00 00
+h 35 00 00 00
+# - Data: ConfigClient::NotifyChangedI32Value
+# IPC Packet size
+h 31 00 00 00
+# Endpoint: ConfigClient
+h 0d 8e 9c 54
+# Message: NotifyChangedI32Value
+h 02 00 00 00
+# domain
+h 08000000
+utf8 mydomain
+# group
+h 09000000
+utf8 coolgroup
+# key
+h 08000000
+utf8 leetness
+# value
+# -1337
+h c7faffff
