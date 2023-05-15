@@ -12,28 +12,27 @@ do
         -- [1419546125] = "ConfigClient.ipc",
     }
 
-    -- Won't work for more than one endpoint
-    local tab_message_type_1419546125 = {
-        [2] = "NotifyChangedI32Value",
-    }
-    local tab_message_type_1419546126 = {
-        [2] = "FooBarThing",
-    }
     local endpoint_info = {}
-
     local f = IPC.fields
     f.direction = ProtoField.uint8("ipc.direction", "Direction", base.DEC, tab_directions)
     f.message = ProtoField.bytes("ipc.message", "Message content")
-    -- DEC=decimal, HEX=hex, DEC_HEX=deconly, HEX_DEC=hexonly???
-    f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.HEX_DEC, tab_endpoints)  -- FIXME: Bad format?!
+    -- FIXME: Bad format?! DEC=decimal, HEX=hex, DEC_HEX=deconly, HEX_DEC=hexonly???
+    f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.HEX_DEC, tab_endpoints)
 
-    f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, tab_message_type_1419546125)
-    endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
-    f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
-    endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
-
-    f.ep_1419546126_type = ProtoField.uint32("ipc.msg.msg_type", "FooBar Message Type (enum)", base.DEC, tab_message_type_1419546126)
-    endpoint_info[1419546126] = {type_field=f.ep_1419546126_type, types={}}
+    --AUTOGENERATE:ENDPOINT_FIELDS_AND_CONTEXT
+    -- Example:
+    -- f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, {
+    --     [2] = "NotifyChangedI32Value",
+    -- })
+    -- endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
+    -- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
+    -- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
+    --
+    -- local tab_message_type_1419546126 = {
+    --     [2] = "FooBarThing",
+    -- }
+    -- f.ep_1419546126_type = ProtoField.uint32("ipc.msg.msg_type", "FooBar Message Type (enum)", base.DEC, tab_message_type_1419546126)
+    -- endpoint_info[1419546126] = {type_field=f.ep_1419546126_type, types={}}
 
 
     function IPC.dissector(buf, pinfo, tree)
@@ -74,6 +73,5 @@ do
         -- FIXME: Parse 'message' according to 'message_ctx.inputs'
     end
 
-    --register_postdissector(IPC)
     DissectorTable.get("wtap_encap"):add(wtap.USER13, IPC)
 end
