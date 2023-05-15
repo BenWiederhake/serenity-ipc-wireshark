@@ -50,35 +50,59 @@ do
     local tab_message_type_1419546126 = {
         [2] = "FooBarThing",
     }
-    local message_type_info_by_endpoint = {}
+    local endpoint_info = {}
 
     local f = IPC.fields
     f.direction = ProtoField.uint8("ipc.direction", "Direction", base.DEC, tab_directions)
     f.message = ProtoField.bytes("ipc.message", "Message content")
-    f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.DEC_HEX, tab_endpoints)  -- FIXME: Bad format?!
-    f.message_type_1419546125 = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, tab_message_type_1419546125)
-    message_type_info_by_endpoint[1419546125] = {field=f.message_type_1419546125}
-    f.message_type_1419546126 = ProtoField.uint32("ipc.msg.msg_type", "FooBar Message Type (enum)", base.DEC, tab_message_type_1419546126)
-    message_type_info_by_endpoint[1419546126] = {field=f.message_type_1419546126}
+    -- DEC=decimal, HEX=hex, DEC_HEX=deconly, HEX_DEC=hexonly???
+    f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.HEX_DEC, tab_endpoints)  -- FIXME: Bad format?!
+
+    f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, tab_message_type_1419546125)
+    endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
+    f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
+    endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
+
+    f.ep_1419546126_type = ProtoField.uint32("ipc.msg.msg_type", "FooBar Message Type (enum)", base.DEC, tab_message_type_1419546126)
+    endpoint_info[1419546126] = {type_field=f.ep_1419546126_type, types={}}
 
 
     function IPC.dissector(buf, pinfo, tree)
+        -- Parse direction
         tree:add(f.direction, buf(0,1))
         pinfo.p2p_dir = buf(0,1):le_uint(); -- Hopefully P2P_DIR_SENT or P2P_DIR_RECV
-        local message_buf = buf(1, buf:len() - 1)
-        local message = tree:add(f.message, message_buf)
-        if buf:len() < 9 then
-            -- FIXME: Report invalid packet
+        local buf = buf(1)
+        local message_tree = tree:add(f.message, buf)
+
+        -- Parse endpoint
+        if buf:len() < 4 then
+            -- FIXME: Report invalid packet, as it is missing the endpoint
             return -1
         end
-        message:add_le(f.endpoint, message_buf(0,4))
-        local endpoint_value = message_buf(0,4):le_uint()
-        local message_type_info = message_type_info_by_endpoint[endpoint_value]
-        if message_type_info == nil then
-            -- FIXME: Report invalid packet
+        message_tree:add_le(f.endpoint, buf(0,4))
+        local endpoint_value = buf(0,4):le_uint()
+        local endpoint_ctx = endpoint_info[endpoint_value]
+        if endpoint_ctx == nil then
+            -- FIXME: Report invalid endpoint magic
             return -1
         end
-        message:add_le(message_type_info.field, message_buf(4,4))
+        local buf = buf(4)
+
+        -- Parse message type
+        if buf:len() < 4 then
+            -- FIXME: Report invalid packet, as it is missing the message type
+            return -1
+        end
+        message_tree:add_le(endpoint_ctx.type_field, buf(0,4))
+        local message_ctx = endpoint_ctx.types[buf(0,4):le_uint()]
+        if message_ctx == nil then
+            -- FIXME: Report invalid message type for this endpoint
+            return -1
+        end
+        local buf = buf(4)
+        local message = message_tree:add(message_ctx.type_field, buf)
+
+        -- FIXME: Parse 'message' according to 'message_ctx.inputs'
     end
 
     --register_postdissector(IPC)
