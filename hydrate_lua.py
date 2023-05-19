@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import json
+import re
 
 
 FILENAME_TEMPLATE = "fileshark_socketipc.in.lua"
 FILENAME_IPC_JSON = "../serenity/all.ipc.json"
 FILENAME_LUA_SCRIPT = "fileshark_socketipc.lua"
+TEMPLATE_NAME_PATTERN = re.compile("^[A-Za-z0-9_]+")
+TEMPLATE_DELIMITER_PATTERN = re.compile("^[<>,]")
 
 
 def camel_casify(snake_case_name):
@@ -22,6 +25,88 @@ def camel_casify(snake_case_name):
     return "".join(letters)
 
 
+def make_halfmsg(snake_case_name, parameters):
+    return dict(snake_case_name=snake_case_name, camel_case_name=camel_casify(snake_case_name), parameters=parameters)
+
+
+def tokenize(simplified_template_string):
+    token_list = []
+    remaining = simplified_template_string.strip()
+    while remaining:
+        match = TEMPLATE_NAME_PATTERN.match(remaining) or TEMPLATE_DELIMITER_PATTERN.match(remaining)
+        assert match is not None, f"Cannot parse any further: {remaining=}, {simplified_template_string=}"
+        match_text = match.group()
+        remaining = remaining[len(match_text) :].strip()
+        token_list.append(match_text)
+    return token_list
+
+
+class Typename:
+    def __init__(self, name, children=None):
+        assert name not in "<,>:_" and len(name) >= 2, f"weird name: {name}"
+        self.name = name
+        self.children = children or []
+        self.hashed = False
+
+    def walk(self, fn):
+        fn(self)
+        for child in self.children:
+            child.walk(fn)
+
+    def to_lua(self):
+        # Technically, this could lead to collisions, because some few templates take a variable amount of arguments.
+        # However, this is good enough.
+        if self.children:
+            return self.name + "_" + "_".join(child.to_lua() for child in self.children)
+        return self.name
+
+    def __eq__(self, other):
+        return self.name == other.name and self.children == other.children
+
+    def __repr__(self):
+        return f"{self.name}{self.children}"
+
+    def __hash__(self):
+        return hash((self.name, tuple(self.children)))
+
+
+def parse_typename(cpp_name):
+    token_list = tokenize(cpp_name.replace("::", "_"))
+    stack = []
+    token_list.reverse()  # in-place
+    current = Typename(token_list.pop())
+    # Invariant: The "current" type is in 'current', as if we were expecting a '<'.
+    # Invariant: There is no deferred linking, or reference that will be added later.
+    while token_list:
+        delimiter = token_list.pop()
+        if delimiter == "<":
+            assert not current.children, f"Duplicate set of template args?! {cpp_name=}"
+            stack.append(current)
+            new_type = Typename(token_list.pop())
+            current.children.append(new_type)
+            current = new_type
+        elif delimiter == ",":
+            new_type = Typename(token_list.pop())
+            stack[-1].children.append(new_type)
+            current = new_type
+        elif delimiter == ">":
+            current = stack.pop()
+        else:
+            assert False, f"Not a delimiter: '{delimiter}' in {cpp_name}"
+    assert not stack, f"Mismatching template parens?! {cpp_name=}"
+    return current
+
+
+def translate(raw_param, params_types):
+    translated_type = parse_typename(raw_param["type"])
+    translated_type.walk(lambda t: params_types["auto" if t.children else "manual"].add(t))
+    return dict(name=raw_param["name"], typename=translated_type, luaname=translated_type.to_lua())
+
+
+def translate_params(raw_parameters, params_types):
+    return [translate(raw_param, params_types) for raw_param in raw_parameters]
+
+
 def generate_table_endpoints(ipc_data):
     lines = []
     for endpoint in ipc_data:
@@ -36,9 +121,9 @@ def generate_endpoint_fields_and_context(ipc_data):
         lines.append(f'    f.ep_{endpoint["magic"]}_type = ProtoField.uint32("ipc.msg.msg_type", "{endpoint["name"]} Message Type (enum)", base.DEC, {{')
 
         #--     [2] = "NotifyChangedI32Value",
-        for msg_idx_zero, message in enumerate(endpoint["messages"]):  # FIXME: Use half-messages!
+        for msg_idx_zero, message in enumerate(endpoint["halfmsgs"]):
             msg_idx_serenity = msg_idx_zero + 1
-            lines.append(f'        [{msg_idx_serenity}] = "{camel_casify(message["name"])}",')
+            lines.append(f'        [{msg_idx_serenity}] = "{message["camel_case_name"]}",')
 
         #-- })
         lines.append('    })')
@@ -48,42 +133,78 @@ def generate_endpoint_fields_and_context(ipc_data):
 
         #-- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_content", "ConfigClient::NotifyChangedI32Value")
         #-- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, inputs={}}
-        for msg_idx_zero, message in enumerate(endpoint["messages"]):  # FIXME: Use half-messages!
+        for msg_idx_zero, message in enumerate(endpoint["halfmsgs"]):
             msg_idx_serenity = msg_idx_zero + 1
             # The generated name is completely fictional, but it's a bit shorter than the snake_case name, and everyone should be able to immediately understand it.
-            lines.append(f'    f.ep_{endpoint["magic"]}_{msg_idx_serenity}_content = ProtoField.bytes("ipc.msg.msg_content", "{endpoint["name"]}::{camel_casify(message["name"])}")')
-            lines.append(f'    endpoint_info[{endpoint["magic"]}].types[{msg_idx_serenity}] = {{type_field=f.ep_{endpoint["magic"]}_{msg_idx_serenity}_content, inputs={{}}}}')
+            lines.append(f'    f.ep_{endpoint["magic"]}_{msg_idx_serenity}_content = ProtoField.bytes("ipc.msg.msg_content", "{endpoint["name"]}::{message["camel_case_name"]}")')
+            lines.append(f'    endpoint_info[{endpoint["magic"]}].types[{msg_idx_serenity}] = {{type_field=f.ep_{endpoint["magic"]}_{msg_idx_serenity}_content, parameters={{')
+            for param in message["parameters"]:
+                #--        {name="domain", parse_fn=parse_DeprecatedString},
+                lines.append(f'        {{name="{param["name"]}", parse_fn=parse_{param["luaname"]}}},')
+            lines.append('    }}')
 
         lines.append("")  # Empty line for "readability".
     return "\n".join(lines)
 
 
-def generate_code_blocks(ipc_data):
+def generate_automatic_types(params_types):
+    # Warn on unknown parent types
+    print(f'Automatically implementing {len(params_types["auto"])} types: {params_types["auto"]}')
+    return '--FIXME: automatic types\n'
+
+
+def generate_code_blocks(ipc_data, params_types):
     blocks_by_name = dict()
     blocks_by_name["TABLE_ENDPOINTS"] = generate_table_endpoints(ipc_data)
     blocks_by_name["ENDPOINT_FIELDS_AND_CONTEXT"] = generate_endpoint_fields_and_context(ipc_data)
-    # FIXME: More
+    blocks_by_name["AUTOMATIC_TYPES"] = generate_automatic_types(params_types)
     return blocks_by_name
 
 
-def process(template, ipc_data):
-    blocks_by_name = generate_code_blocks(ipc_data)
+def preprocess(ipc_data):
+    params_types = dict(seen=set(), auto=set(), manual=set())
+    for endpoint in ipc_data:
+        endpoint["halfmsgs"] = []
+        for message in endpoint["messages"]:
+            translated_params = translate_params(message["inputs"], params_types)
+            endpoint["halfmsgs"].append(make_halfmsg(message["name"], translated_params))
+            if message["is_sync"]:
+                translated_params = translate_params(message["outputs"], params_types)
+                endpoint["halfmsgs"].append(make_halfmsg(message["name"] + "_response", translated_params))
+    return params_types
+
+
+def process(template, ipc_data, params_types):
+    assert all("halfmsgs" in endpoint for endpoint in ipc_data), "Data must be preprocessed first"
+    blocks_by_name = generate_code_blocks(ipc_data, params_types)
     used_blocks = set()
+    defined_params = set()
     lines = []
     for line in template.split("\n"):
         trimmed = line.strip()
-        magic = "--AUTOGENERATE:"
-        if trimmed.startswith(magic):
-            block_name = trimmed[len(magic):]
+        autogen_magic = "--AUTOGENERATE:"
+        typeimpl_magic = "--TYPEIMPL:"
+        if trimmed.startswith(autogen_magic):
+            block_name = trimmed[len(autogen_magic):]
             assert block_name not in used_blocks, f"Tried to use {block_name} again?!"
             used_blocks.add(block_name)
             block_content = blocks_by_name.get(block_name, None)
             assert block_content is not None, f"Tried to generate unknown block >>{block_name}<<?! Only these blocks are available: {list(blocks_by_name.keys())}"
             lines.append(block_content)
+        elif trimmed.startswith(typeimpl_magic):
+            typeimpl_name = trimmed[len(typeimpl_magic):]
+            defined_params.add(typeimpl_name)
         else:
             lines.append(line)
     # We already checked that no "unknown" block is used, so we only need to check for unused blocks:
     assert blocks_by_name.keys() == used_blocks, f"The blocks {set(blocks_by_name.keys()).difference(used_blocks)} were unused?!"
+    underdefined_types = params_types["manual"].difference(defined_params)
+    by_name = lambda typename: typename.name
+    if underdefined_types:
+        print(f"WARNING, MISSING: Some types OCCUR in all.ipc.json but are NOT implemented in Lua: {sorted(underdefined_types, key=by_name)}")
+    overdefined_types = defined_params.difference(params_types["manual"])
+    if overdefined_types:
+        print(f"WARNING, UNUSED: Some types do NOT occur in all.ipc.json but ARE implemented in Lua: {sorted(overdefined_types, key=by_name)}")
     return "\n".join(lines)
 
 
@@ -92,7 +213,8 @@ def run():
         template = fp.read()
     with open(FILENAME_IPC_JSON, "r") as fp:
         ipc_data = json.load(fp)
-    lua_script = process(template, ipc_data)
+    params_types = preprocess(ipc_data)
+    lua_script = process(template, ipc_data, params_types)
     with open(FILENAME_LUA_SCRIPT, "w") as fp:
         fp.write(lua_script)
 

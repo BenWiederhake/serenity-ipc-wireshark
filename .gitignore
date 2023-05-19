@@ -1,2 +1,3 @@
 *.pcap
 fileshark_socketipc.lua
+__pycache__/
