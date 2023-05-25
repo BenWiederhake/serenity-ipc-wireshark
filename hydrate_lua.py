@@ -157,7 +157,13 @@ def generate_automatic_types(params_types):
             assert len(param_type.children) == 1, param_type
             subtype = param_type.children[0].to_lua()
             parts.append(f"    local function parse_Vector_{subtype}(param_name, buf, empty_buf, tree)")
-            parts.append(f"        return helper_parse_Vector(param_name, buf, empty_buf, tree, parse_{subtype})")
+            parts.append(f"        return helper_parse_Vector(param_name, buf, empty_buf, tree, parse_{subtype} or parse_unimpl)")
+            parts.append(f"    end")
+        elif param_type.name == "Optional":
+            assert len(param_type.children) == 1, param_type
+            subtype = param_type.children[0].to_lua()
+            parts.append(f"    local function parse_Optional_{subtype}(param_name, buf, empty_buf, tree)")
+            parts.append(f"        return helper_parse_Optional(param_name, buf, empty_buf, tree, parse_{subtype} or parse_unimpl)")
             parts.append(f"    end")
         elif param_type.name not in complaints:
             complaints.add(param_type.name)

@@ -80,6 +80,28 @@ do
         return consumed_bytes
     end
 
+    f.optional = ProtoField.bytes("ipc.type.opt", "Optional<...>::None", base.NONE)
+    local function helper_parse_Optional(param_name, buf, empty_buf, tree, parse_element_fn)
+        -- FIXME: Deal with insufficiently small buffers
+        local orig_buf = buf(0,1)
+        local has_value = orig_buf:le_uint()
+        local consumed_bytes = 1
+        buf = snip(buf, empty_buf, 1)
+
+        if has_value ~= 0 then
+            local parsed_bytes = parse_element_fn(param_name, buf, empty_buf, tree)
+            if parsed_bytes < 0 then
+                return -1
+            else
+                consumed_bytes = consumed_bytes + parsed_bytes
+            end
+        else
+            local none_tree = tree:add_le(f.optional, orig_buf)
+            none_tree:prepend_text(string.format("%s: ", param_name))
+        end
+        return consumed_bytes
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
