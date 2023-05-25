@@ -198,13 +198,13 @@ def process(template, ipc_data, params_types):
             lines.append(line)
     # We already checked that no "unknown" block is used, so we only need to check for unused blocks:
     assert blocks_by_name.keys() == used_blocks, f"The blocks {set(blocks_by_name.keys()).difference(used_blocks)} were unused?!"
-    underdefined_types = params_types["manual"].difference(defined_params)
-    by_name = lambda typename: typename.name
+    expected_params = {param_type.name for param_type in params_types["manual"]}
+    underdefined_types = expected_params.difference(defined_params)
     if underdefined_types:
-        print(f"WARNING, MISSING: Some types OCCUR in all.ipc.json but are NOT implemented in Lua: {sorted(underdefined_types, key=by_name)}")
-    overdefined_types = defined_params.difference(params_types["manual"])
+        print(f"WARNING, MISSING: Some types OCCUR in all.ipc.json but are NOT implemented in Lua: {sorted(underdefined_types)}")
+    overdefined_types = defined_params.difference(expected_params)
     if overdefined_types:
-        print(f"WARNING, UNUSED: Some types do NOT occur in all.ipc.json but ARE implemented in Lua: {sorted(overdefined_types, key=by_name)}")
+        print(f"WARNING, UNUSED: Some types do NOT occur in all.ipc.json but ARE implemented in Lua: {sorted(overdefined_types)}")
     return "\n".join(lines)
 
 
