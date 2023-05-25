@@ -68,14 +68,14 @@ do
         tree:add_le(f.direction, buf(0,4))
         pinfo.p2p_dir = buf(0,4):le_uint(); -- Hopefully P2P_DIR_SENT or P2P_DIR_RECV
         buf = snip(buf, empty_buf, 4)
-        local message_tree = tree:add(f.message, buf)
+        tree:add(f.message, buf)
 
         -- Parse endpoint
         if buf:len() < 4 then
             -- FIXME: Report invalid packet, as it is missing the endpoint
             return -1
         end
-        message_tree:add_le(f.endpoint, buf(0,4))
+        tree:add_le(f.endpoint, buf(0,4))
         local endpoint_value = buf(0,4):le_uint()
         local endpoint_ctx = endpoint_info[endpoint_value]
         if endpoint_ctx == nil then
@@ -89,14 +89,14 @@ do
             -- FIXME: Report invalid packet, as it is missing the message type
             return -1
         end
-        message_tree:add_le(endpoint_ctx.type_field, buf(0,4))
+        tree:add_le(endpoint_ctx.type_field, buf(0,4))
         local message_ctx = endpoint_ctx.types[buf(0,4):le_uint()]
         if message_ctx == nil then
             -- FIXME: Report invalid message type for this endpoint
             return -1
         end
         buf = snip(buf, empty_buf, 4)
-        local message = message_tree:add(message_ctx.type_field, buf)
+        local message = tree:add(message_ctx.type_field, buf)
 
         -- FIXME: Parse 'message' according to 'message_ctx.parameters'
         local broke = false;
