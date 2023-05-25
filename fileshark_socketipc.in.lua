@@ -43,8 +43,48 @@ do
         return buf:len()
     end
 
+    f.str_buf = ProtoField.string("ipc.type.str", "String content", base.UNICODE)
+    local function parse_DeprecatedString(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:DeprecatedString
+        -- FIXME: Deal with insufficiently small buffers
+        local str_len = buf(0, 4):le_uint()
+        buf = snip(buf, empty_buf, 4)
+        local content_buf = empty_buf
+        if str_len ~= 0 then
+            content_buf = buf(0, str_len)
+        end
+        local param_tree = tree:add(f.str_buf, content_buf)
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 4 + str_len
+    end
+
+    f.vec_generic = ProtoField.uint32("ipc.type.vec", "Vector<...>")
+    local function helper_parse_Vector(param_name, buf, empty_buf, tree, parse_element_fn)
+        -- FIXME: Deal with insufficiently small buffers
+        local num_elements = buf(0,4):le_uint()
+        local elements_tree = tree:add_le(f.vec_generic, buf(0, 4))
+        elements_tree:prepend_text(string.format("%s: ", param_name))
+        local consumed_bytes = 4
+        buf = snip(buf, empty_buf, 4)
+
+        for i=1,num_elements do
+            local parsed_bytes = parse_element_fn(string.format("#%d", i - 1), buf, empty_buf, elements_tree)
+            if parsed_bytes < 0 then
+                return -1
+            else
+                buf = snip(buf, empty_buf, parsed_bytes)
+                consumed_bytes = consumed_bytes + parsed_bytes
+            end
+        end
+        elements_tree:set_len(consumed_bytes)
+        return consumed_bytes
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
-    -- EXAMPLE: FIXME
+    -- Example:
+    -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
+    --     return helper_parse_Vector(param_name, buf, empty_buf, tree, parse_DeprecatedString)
+    -- end
 
     --AUTOGENERATE:ENDPOINT_FIELDS_AND_CONTEXT
     -- Example:
@@ -61,7 +101,7 @@ do
     -- }}
 
     function IPC.dissector(buf, pinfo, tree)
-        -- Necessary for "empty" parameters, sigh
+        -- Necessary for trailing "empty" parameters, sigh
         local empty_buf = buf(0,0)
 
         -- Parse direction

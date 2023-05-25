@@ -150,7 +150,20 @@ def generate_endpoint_fields_and_context(ipc_data):
 def generate_automatic_types(params_types):
     # Warn on unknown parent types
     print(f'Automatically implementing {len(params_types["auto"])} types: {params_types["auto"]}')
-    return '--FIXME: automatic types\n'
+    complaints = set()
+    parts = []
+    for param_type in params_types["auto"]:
+        if param_type.name == "Vector":
+            assert len(param_type.children) == 1, param_type
+            subtype = param_type.children[0].to_lua()
+            parts.append(f"    local function parse_Vector_{subtype}(param_name, buf, empty_buf, tree)")
+            parts.append(f"        return helper_parse_Vector(param_name, buf, empty_buf, tree, parse_{subtype})")
+            parts.append(f"    end")
+        elif param_type.name not in complaints:
+            complaints.add(param_type.name)
+            parts.append(f"    --FIXME: {param_type.name}")
+            print(f"FIXME: Unimplemented automatic type {param_type.name}")
+    return "\n".join(parts)
 
 
 def generate_code_blocks(ipc_data, params_types):
