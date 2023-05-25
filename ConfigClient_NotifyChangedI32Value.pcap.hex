@@ -37,3 +37,23 @@ utf8 leetness
 # value
 # -1337
 h c7faffff
+
+# === Option of false bool:
+# timeval (u32 sec, u32 usec)
+h 00000000 00000000
+# length must effectively be provided twice.
+h 0e 00 00 00
+h 0e 00 00 00
+# - Data: ConfigServer::ReadBoolValueResponse
+# We drop the IPC packet size, and instead encode whether this is an incoming our outgoing packet.
+# P2P_DIR_SENT    =  0
+# P2P_DIR_RECV    =  1
+h 01 00 00 00
+# Endpoint: ConfigServer
+h 74 4b 0e 0f
+# Message: ReadBoolValueResponse
+h 0e 00 00 00
+# Option<bool> { false } = h 01 00
+h 01 00
+# Option<bool> { true } = h 01 01
+# Option<bool> { } = h 00 (and then nothing)

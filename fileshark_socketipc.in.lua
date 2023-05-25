@@ -102,6 +102,15 @@ do
         return consumed_bytes
     end
 
+    f.bool = ProtoField.bool("ipc.type.bool", "Boolean")
+    local function parse_bool(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:bool
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.bool, buf(0, 1))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 1
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
