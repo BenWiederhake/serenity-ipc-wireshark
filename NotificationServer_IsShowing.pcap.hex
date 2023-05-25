@@ -14,13 +14,13 @@ h a0 00 00 00
 # timeval (u32 sec, u32 usec)
 h 00000000 00000000
 # length must effectively be provided twice.
-h 09 00 00 00
-h 09 00 00 00
+h 0C 00 00 00
+h 0C 00 00 00
 # - Data
 # We drop the IPC packet size, and instead encode whether this is an incoming our outgoing packet.
 # P2P_DIR_SENT    =  0
 # P2P_DIR_RECV    =  1
-h 00
+h 00 00 00 00
 # Endpoint: NotificationServer
 h 252ac8a1
 # Message: IsShowing

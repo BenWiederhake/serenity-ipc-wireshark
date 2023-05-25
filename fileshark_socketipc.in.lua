@@ -16,7 +16,7 @@ do
     local f = IPC.fields
     f.unimpl_params = ProtoField.bytes("ipc.unimpl", "Unimplemented parameters")
     f.unexpected_padding = ProtoField.bytes("ipc.unexpected_padding", "Unexpected padding")
-    f.direction = ProtoField.uint8("ipc.direction", "Direction", base.DEC, tab_directions)
+    f.direction = ProtoField.uint32("ipc.direction", "Direction", base.DEC, tab_directions)
     f.message = ProtoField.bytes("ipc.message", "Actual on-wire message content (minus leading message size)")
     -- FIXME: Bad format?! DEC=decimal, HEX=hex, DEC_HEX=deconly, HEX_DEC=hexonly???
     f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.HEX_DEC, tab_endpoints)
@@ -65,9 +65,9 @@ do
         local empty_buf = buf(0,0)
 
         -- Parse direction
-        tree:add(f.direction, buf(0,1))
-        pinfo.p2p_dir = buf(0,1):le_uint(); -- Hopefully P2P_DIR_SENT or P2P_DIR_RECV
-        buf = snip(buf, empty_buf, 1)
+        tree:add_le(f.direction, buf(0,4))
+        pinfo.p2p_dir = buf(0,4):le_uint(); -- Hopefully P2P_DIR_SENT or P2P_DIR_RECV
+        buf = snip(buf, empty_buf, 4)
         local message_tree = tree:add(f.message, buf)
 
         -- Parse endpoint
