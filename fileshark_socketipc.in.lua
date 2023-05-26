@@ -69,6 +69,8 @@ do
     end
     --TYPEIMPL:String
     local parse_String = parse_DeprecatedString
+    --TYPEIMPL:URL
+    local parse_URL = parse_DeprecatedString
 
     f.vec_generic = ProtoField.uint32("ipc.type.vec", "Vector<...>")
     local function helper_parse_Vector(param_name, buf, empty_buf, tree, parse_element_fn)
