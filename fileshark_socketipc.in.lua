@@ -232,6 +232,17 @@ do
         return 8
     end
 
+    f.type_int_point = ProtoField.bytes("ipc.type.int_point", "Gfx::IntPoint")
+    local function parse_Gfx_IntPoint(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:Gfx_IntPoint
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.type_int_point, buf(0, 8))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        parse_i32("x", buf(0, 4), empty_buf, param_tree)
+        parse_i32("y", buf(4, 4), empty_buf, param_tree)
+        return 8
+    end
+
     f.type_sbm = ProtoField.bytes("ipc.type.sbm", "Gfx::ShareableBitmap")
     local tab_bitmap_format = {
         [0] = "Invalid",
