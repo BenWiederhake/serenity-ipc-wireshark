@@ -211,6 +211,26 @@ do
         return 16
     end
 
+    f.type_float = ProtoField.float("ipc.type.float", "float")
+    local function parse_float(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:float
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add_le(f.type_float, buf(0, 4))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 4
+    end
+
+    f.type_int_size = ProtoField.bytes("ipc.type.int_size", "Gfx::IntSize")
+    local function parse_Gfx_IntSize(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:Gfx_IntSize
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.type_int_size, buf(0, 8))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        parse_i32("w", buf(0, 4), empty_buf, param_tree)
+        parse_i32("h", buf(4, 4), empty_buf, param_tree)
+        return 8
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
