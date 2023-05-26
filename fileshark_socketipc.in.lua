@@ -202,7 +202,7 @@ do
     local function parse_Gfx_IntRect(param_name, buf, empty_buf, tree)
         --TYPEIMPL:Gfx_IntRect
         -- FIXME: Deal with insufficiently small buffers
-        local param_tree = tree:add(f.type_int_rect, buf(0, 12))
+        local param_tree = tree:add(f.type_int_rect, buf(0, 16))
         param_tree:prepend_text(string.format("%s: ", param_name))
         parse_i32("x", buf(0, 4), empty_buf, param_tree)
         parse_i32("y", buf(4, 4), empty_buf, param_tree)
