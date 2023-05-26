@@ -64,7 +64,7 @@ do
         end
         local param_tree = tree:add(f.str_buf, content_buf)
         param_tree:prepend_text(string.format("%s: ", param_name))
-        param_tree:add(f.str_len, orig_buf)
+        param_tree:add_le(f.str_len, orig_buf)
         return 4 + str_len
     end
 
@@ -150,11 +150,11 @@ do
         return 1
     end
 
-    f.type_file = ProtoField.bool("ipc.type.file", "File (contents aren't logged)")
+    f.type_file = ProtoField.bytes("ipc.type.file", "File (contents aren't logged)")
     local function parse_IPC_File(param_name, buf, empty_buf, tree)
         --TYPEIMPL:IPC_File
         -- FIXME: Deal with insufficiently small buffers
-        local param_tree = tree:add(f.bool, empty_buf)
+        local param_tree = tree:add(f.type_file, empty_buf)
         param_tree:prepend_text(string.format("%s: ", param_name))
         return 0
     end
@@ -172,11 +172,11 @@ do
         if is_valid == 0 then
             return 1
         end
-        param_tree:set_len(1 + 4)
-        buf = snip(buf, empty_buf, 4)
+        buf = snip(buf, empty_buf, 1)
         param_tree:add_le(f.type_anon_buf_size, buf(0, 4))
         -- FIXME: Check call?
         parse_IPC_File("file", empty_buf, empty_buf, param_tree)
+        param_tree:set_len(1 + 4)
         return 1 + 4
     end
 
