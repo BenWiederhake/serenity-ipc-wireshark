@@ -44,17 +44,27 @@ do
     end
 
     f.str_buf = ProtoField.string("ipc.type.str", "String content", base.UNICODE)
+    f.str_len = ProtoField.uint32("ipc.type.str.len", "String length", base.DEC)
+    f.str_null = ProtoField.bytes("ipc.type.str.null", "String NULL", base.NONE)
     local function parse_DeprecatedString(param_name, buf, empty_buf, tree)
         --TYPEIMPL:DeprecatedString
         -- FIXME: Deal with insufficiently small buffers
         local str_len = buf(0, 4):le_uint()
+        local orig_buf = buf(0, 4)
         buf = snip(buf, empty_buf, 4)
         local content_buf = empty_buf
-        if str_len ~= 0 then
+        if str_len == 0xFFFFFFFF then
+            -- This is so weird, handle it separately.
+            local param_tree = tree:add(f.str_null, content_buf)
+            param_tree:prepend_text(string.format("%s: ", param_name))
+            param_tree:add(f.str_len, orig_buf)
+            return 4
+        elseif str_len ~= 0 then
             content_buf = buf(0, str_len)
         end
         local param_tree = tree:add(f.str_buf, content_buf)
         param_tree:prepend_text(string.format("%s: ", param_name))
+        param_tree:add(f.str_len, orig_buf)
         return 4 + str_len
     end
 
