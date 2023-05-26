@@ -67,6 +67,7 @@ do
         param_tree:add_le(f.str_len, orig_buf)
         return 4 + str_len
     end
+    --TYPEIMPL:String
     local parse_String = parse_DeprecatedString
 
     f.vec_generic = ProtoField.uint32("ipc.type.vec", "Vector<...>")
