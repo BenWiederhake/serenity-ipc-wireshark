@@ -117,13 +117,13 @@ def generate_table_endpoints(ipc_data):
 def generate_endpoint_fields_and_context(ipc_data):
     lines = []
     for endpoint in ipc_data:
-        #-- f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, {
-        lines.append(f'    f.ep_{endpoint["magic"]}_type = ProtoField.uint32("ipc.msg.msg_type", "{endpoint["name"]} Message Type (enum)", base.DEC, {{')
+        #-- f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "Message Type (enum)", base.DEC, {
+        lines.append(f'    f.ep_{endpoint["magic"]}_type = ProtoField.uint32("ipc.msg.msg_type", "Message Type (enum)", base.DEC, {{')
 
-        #--     [2] = "NotifyChangedI32Value",
+        #--     [2] = "ConfigClient::NotifyChangedI32Value",
         for msg_idx_zero, message in enumerate(endpoint["halfmsgs"]):
             msg_idx_serenity = msg_idx_zero + 1
-            lines.append(f'        [{msg_idx_serenity}] = "{message["camel_case_name"]}",')
+            lines.append(f'        [{msg_idx_serenity}] = "{endpoint["name"]}::{message["camel_case_name"]}",')
 
         #-- })
         lines.append('    })')

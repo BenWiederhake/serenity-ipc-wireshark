@@ -188,8 +188,8 @@ do
 
     --AUTOGENERATE:ENDPOINT_FIELDS_AND_CONTEXT
     -- Example:
-    -- f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "ConfigClient Message Type (enum)", base.DEC, {
-    --     [2] = "NotifyChangedI32Value",
+    -- f.ep_1419546125_type = ProtoField.uint32("ipc.msg.msg_type", "Message Type (enum)", base.DEC, {
+    --     [2] = "ConfigClient::NotifyChangedI32Value",
     -- })
     -- endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
     -- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
