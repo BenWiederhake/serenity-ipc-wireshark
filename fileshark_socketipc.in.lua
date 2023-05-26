@@ -112,6 +112,35 @@ do
         return consumed_bytes
     end
 
+    f.hashmap_generic = ProtoField.bytes("ipc.type.hashmap", "HashMap<...>", base.NONE)
+    local function helper_parse_HashMap(param_name, buf, empty_buf, tree, parse_key_fn, parse_value_fn)
+        -- FIXME: Deal with insufficiently small buffers
+        local num_elements = buf(0,4):le_uint()
+        local elements_tree = tree:add_le(f.hashmap_generic, buf(0, 4))
+        elements_tree:prepend_text(string.format("%s: ", param_name))
+        local consumed_bytes = 4
+        buf = snip(buf, empty_buf, 4)
+
+        for i=1,num_elements do
+            local parsed_bytes = parse_key_fn(string.format("key #%d", i - 1), buf, empty_buf, elements_tree)
+            if parsed_bytes < 0 then
+                return -1
+            else
+                buf = snip(buf, empty_buf, parsed_bytes)
+                consumed_bytes = consumed_bytes + parsed_bytes
+            end
+            local parsed_bytes = parse_value_fn(string.format("value #%d", i - 1), buf, empty_buf, elements_tree)
+            if parsed_bytes < 0 then
+                return -1
+            else
+                buf = snip(buf, empty_buf, parsed_bytes)
+                consumed_bytes = consumed_bytes + parsed_bytes
+            end
+        end
+        elements_tree:set_len(consumed_bytes)
+        return consumed_bytes
+    end
+
     f.bool = ProtoField.bool("ipc.type.bool", "Boolean")
     local function parse_bool(param_name, buf, empty_buf, tree)
         --TYPEIMPL:bool

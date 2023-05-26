@@ -165,6 +165,13 @@ def generate_automatic_types(params_types):
             parts.append(f"    local function parse_Optional_{subtype}(param_name, buf, empty_buf, tree)")
             parts.append(f"        return helper_parse_Optional(param_name, buf, empty_buf, tree, parse_{subtype} or parse_unimpl)")
             parts.append(f"    end")
+        elif param_type.name == "HashMap" or param_type.name == "OrderedHashMap":
+            assert len(param_type.children) in [2, 3], param_type
+            key_type, value_type = param_type.children[:2]
+            # Don't care about the trait type
+            parts.append(f"    local function parse_{param_type.to_lua()}(param_name, buf, empty_buf, tree)")
+            parts.append(f"        return helper_parse_HashMap(param_name, buf, empty_buf, tree, parse_{key_type.to_lua()} or parse_unimpl, parse_{value_type.to_lua()} or parse_unimpl)")
+            parts.append(f"    end")
         elif param_type.name not in complaints:
             complaints.add(param_type.name)
             parts.append(f"    --FIXME: {param_type.name}")
