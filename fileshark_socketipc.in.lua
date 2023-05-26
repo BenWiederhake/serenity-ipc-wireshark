@@ -180,6 +180,37 @@ do
         return 1 + 4
     end
 
+    f.type_u32 = ProtoField.uint32("ipc.type.u32", "value")
+    local function parse_u32(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:u32
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add_le(f.type_u32, buf(0, 4))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 4
+    end
+
+    f.type_i32 = ProtoField.int32("ipc.type.i32", "value")
+    local function parse_i32(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:i32
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add_le(f.type_i32, buf(0, 4))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 4
+    end
+
+    f.type_int_rect = ProtoField.bytes("ipc.type.int_rect", "Gfx::IntRect")
+    local function parse_Gfx_IntRect(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:Gfx_IntRect
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.type_int_rect, buf(0, 12))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        parse_i32("x", buf(0, 4), empty_buf, param_tree)
+        parse_i32("y", buf(4, 4), empty_buf, param_tree)
+        parse_i32("w", buf(8, 4), empty_buf, param_tree)
+        parse_i32("h", buf(12, 4), empty_buf, param_tree)
+        return 16
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
