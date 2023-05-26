@@ -232,6 +232,66 @@ do
         return 8
     end
 
+    f.type_sbm = ProtoField.bytes("ipc.type.sbm", "Gfx::ShareableBitmap")
+    local tab_bitmap_format = {
+        [0] = "Invalid",
+        [1] = "Indexed1",
+        [2] = "Indexed2",
+        [3] = "Indexed4",
+        [4] = "Indexed8",
+        [5] = "BGRx8888",
+        [6] = "BGRA8888",
+        [7] = "RGBA8888",
+    }
+    f.type_sbm_format = ProtoField.uint32("ipc.type.sbm.format", "Format", base.DEC, tab_bitmap_format)
+    local function parse_Gfx_ShareableBitmap(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:Gfx_ShareableBitmap
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add_le(f.type_sbm, buf(0, 1))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        local is_valid = buf(0, 1):le_uint()
+        if is_valid == 0 then
+            return 1
+        end
+        local consumed_bytes = 1
+        buf = snip(buf, empty_buf, 1)
+        parse_IPC_File("bitmap data", buf, empty_buf, param_tree)
+        -- buf = snip(buf, empty_buf, 0)
+
+        parsed_bytes = parse_Gfx_IntSize("bitmap data", buf, empty_buf, param_tree)
+        if parsed_bytes < 0 then
+            return -1
+        end
+        consumed_bytes = consumed_bytes + parsed_bytes
+        buf = snip(buf, empty_buf, parsed_bytes)
+
+        parsed_bytes = parse_u32("scale", buf, empty_buf, param_tree)
+        if parsed_bytes < 0 then
+            return -1
+        end
+        consumed_bytes = consumed_bytes + parsed_bytes
+        buf = snip(buf, empty_buf, parsed_bytes)
+
+        elements_tree = param_tree:add_le(f.type_sbm_format, buf(0, 4))
+        local bitmap_format = buf(0, 4):le_uint()
+        consumed_bytes = consumed_bytes + 4
+        buf = snip(buf, empty_buf, parsed_bytes)
+
+        if bitmap_format >= 1 and bitmap_format <= 4 then
+            parsed_bytes = parse_Vector_u32("palette", buf, empty_buf, param_tree)
+            if parsed_bytes < 0 then
+                return -1
+            end
+            consumed_bytes = consumed_bytes + parsed_bytes
+        elseif bitmap_format < 1 or bitmap_format > 7 then
+            -- Unknown format, cannot know for sure whether a palette follows
+            return -1
+        end
+
+        param_tree:set_len(consumed_bytes)
+        return consumed_bytes
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
