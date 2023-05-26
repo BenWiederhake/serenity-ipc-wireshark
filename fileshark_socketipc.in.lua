@@ -121,6 +121,36 @@ do
         return 1
     end
 
+    f.type_file = ProtoField.bool("ipc.type.file", "File (contents aren't logged)")
+    local function parse_IPC_File(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:IPC_File
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.bool, empty_buf)
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 0
+    end
+
+    f.type_anon_buf = ProtoField.bytes("ipc.type.anon_buf", "Core::AnonymousBuffer")
+    f.type_anon_buf_validity = ProtoField.bool("ipc.type.anon_buf.valid", "valid")
+    f.type_anon_buf_size = ProtoField.uint32("ipc.type.anon_buf.size", "size")
+    local function parse_Core_AnonymousBuffer(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:Core_AnonymousBuffer
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add(f.type_anon_buf, buf(0, 1))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        param_tree:add_le(f.type_anon_buf_validity, buf(0, 1))
+        local is_valid = buf(0, 1):uint()
+        if is_valid == 0 then
+            return 1
+        end
+        param_tree:set_len(1 + 4)
+        buf = snip(buf, empty_buf, 4)
+        param_tree:add_le(f.type_anon_buf_size, buf(0, 4))
+        -- FIXME: Check call?
+        parse_IPC_File("file", empty_buf, empty_buf, param_tree)
+        return 1 + 4
+    end
+
     --AUTOGENERATE:AUTOMATIC_TYPES
     -- Example:
     -- local function parse_Vector_DeprecatedString(param_name, buf, empty_buf, tree)
