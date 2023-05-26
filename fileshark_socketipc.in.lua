@@ -190,6 +190,8 @@ do
         param_tree:prepend_text(string.format("%s: ", param_name))
         return 4
     end
+    --TYPEIMPL:unsigned
+    local parse_unsigned = parse_u32
 
     f.type_i32 = ProtoField.int32("ipc.type.i32", "value")
     local function parse_i32(param_name, buf, empty_buf, tree)
@@ -199,6 +201,8 @@ do
         param_tree:prepend_text(string.format("%s: ", param_name))
         return 4
     end
+    --TYPEIMPL:int
+    local parse_int = parse_i32
 
     f.type_int_rect = ProtoField.bytes("ipc.type.int_rect", "Gfx::IntRect")
     local function parse_Gfx_IntRect(param_name, buf, empty_buf, tree)
