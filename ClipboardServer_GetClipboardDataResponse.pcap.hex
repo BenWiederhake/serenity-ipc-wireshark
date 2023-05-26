@@ -1,0 +1,64 @@
+# === PCAP header
+# Magic (little endian)
+h D4 C3 B2 A1
+# Version major an minor
+h 02 00 04 00
+# Pointless timestamps
+h 00 00 00 00  00 00 00 00
+# "snaplen"
+h 00 00 04 00
+# Linktype, let's use, uhhh … dunno, LINKTYPE_USER13 should be fine. That's 160.
+h a0 00 00 00
+
+# === empty hashmap of DeprecatedString:
+# timeval (u32 sec, u32 usec)
+h 00000000 00000000
+# length must effectively be provided twice.
+h 15 00 00 00
+h 15 00 00 00
+# - Data: ClipboardServer::GetClipboardDataResponse
+# We drop the IPC packet size, and instead encode whether this is an incoming our outgoing packet.
+# P2P_DIR_SENT    =  0
+# P2P_DIR_RECV    =  1
+h 01 00 00 00
+# Endpoint: ClipboardServer
+h db 28 3a 4f
+# Message: GetClipboardDataResponse
+h 02 00 00 00
+# AnonBuffer valid: false
+h 00
+# Mimetype: NULL
+h ff ff ff ff
+# metadata: 0 entries
+h 00 00 00 00
+
+# === non-empty hashmap of DeprecatedString:
+# timeval (u32 sec, u32 usec)
+h 00000000 00000000
+# length must effectively be provided twice.
+h 35 00 00 00
+h 35 00 00 00
+# - Data: ClipboardServer::GetClipboardDataResponse
+# We drop the IPC packet size, and instead encode whether this is an incoming our outgoing packet.
+# P2P_DIR_SENT    =  0
+# P2P_DIR_RECV    =  1
+h 01 00 00 00
+# Endpoint: ClipboardServer
+h db 28 3a 4f
+# Message: GetClipboardDataResponse
+h 02 00 00 00
+# AnonBuffer valid: false
+h 00
+# Mimetype: NULL
+h ff ff ff ff
+# metadata: 2 entries
+h 02 00 00 00
+# Entry 1:
+h 04 00 00 00
+utf8 Well
+h 05 00 00 00
+utf8 Hello
+# Entry 2:
+h 07 00 00 00
+utf8 Friends
+h 00 00 00 00
