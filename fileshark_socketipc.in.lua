@@ -261,6 +261,119 @@ do
         return 8
     end
 
+    -- FIXME: Use "none" more often?
+    f.type_sql = ProtoField.none("ipc.type.sql", "SQL::Value")
+    -- Wireshark already unshifts the value for us.
+    -- In a way that's nice and helpful, but it also means we have to intentionally desync from the C++ implementation.
+    -- Since we *also* need to actually parse the values, and I want to avoid using magic numbers in the code, this initial table is damn ugly.
+    local CONST_SQL_TYPE_DATA_SQL_Null = 0x1
+    local CONST_SQL_TYPE_DATA_SQL_Int8 = 0x2
+    local CONST_SQL_TYPE_DATA_SQL_Int16 = 0x3
+    local CONST_SQL_TYPE_DATA_SQL_Int32 = 0x4
+    local CONST_SQL_TYPE_DATA_SQL_Int64 = 0x5
+    local CONST_SQL_TYPE_DATA_SQL_Uint8 = 0x6
+    local CONST_SQL_TYPE_DATA_SQL_Uint16 = 0x7
+    local CONST_SQL_TYPE_DATA_SQL_Uint32 = 0x8
+    local CONST_SQL_TYPE_DATA_SQL_Uint64 = 0x9
+    local tab_sql_type_data = {
+        [CONST_SQL_TYPE_DATA_SQL_Null] = "Null",
+        [CONST_SQL_TYPE_DATA_SQL_Int8] = "Int8",
+        [CONST_SQL_TYPE_DATA_SQL_Int16] = "Int16",
+        [CONST_SQL_TYPE_DATA_SQL_Int32] = "Int32",
+        [CONST_SQL_TYPE_DATA_SQL_Int64] = "Int64",
+        [CONST_SQL_TYPE_DATA_SQL_Uint8] = "Uint8",
+        [CONST_SQL_TYPE_DATA_SQL_Uint16] = "Uint16",
+        [CONST_SQL_TYPE_DATA_SQL_Uint32] = "Uint32",
+        [CONST_SQL_TYPE_DATA_SQL_Uint64] = "Uint64",
+    }
+    f.type_sql_type_data = ProtoField.uint8("ipc.type.sql.type_data", "SQL::TypeData", base.HEX, tab_sql_type_data, 0xF0)
+    local CONST_SQL_SQL_TYPE_null = 0x0
+    local CONST_SQL_SQL_TYPE_text = 0x1
+    local CONST_SQL_SQL_TYPE_int = 0x2
+    local CONST_SQL_SQL_TYPE_float = 0x3
+    local CONST_SQL_SQL_TYPE_bool = 0x4
+    local CONST_SQL_SQL_TYPE_tuple = 0x5
+    local tab_sql_sql_type = {
+        [CONST_SQL_SQL_TYPE_null] = "null",
+        [CONST_SQL_SQL_TYPE_text] = "text",
+        [CONST_SQL_SQL_TYPE_int] = "int",
+        [CONST_SQL_SQL_TYPE_float] = "float",
+        [CONST_SQL_SQL_TYPE_bool] = "bool",
+        [CONST_SQL_SQL_TYPE_tuple] = "tuple",
+    }
+    f.type_sql_sql_type = ProtoField.uint8("ipc.type.sql.sql_type", "SQL::SQLType", base.HEX, tab_sql_sql_type, 0x0F)
+    local function parse_SQL_Value(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:SQL_Value
+        -- FIXME: Deal with insufficiently small buffers
+        local element_tree = tree:add(f.type_sql, buf(0, 1))
+        element_tree:prepend_text(string.format("%s: ", param_name))
+
+        -- TODO: Maybe use add_packet_field instead?
+        element_tree:add(f.type_sql_type_data, buf(0, 1))
+        element_tree:add(f.type_sql_sql_type, buf(0, 1))
+        local type_data = math.floor(buf(0, 1):uint() / 16)
+        local sql_type = buf(0, 1):uint() % 16
+
+        local consumed_bytes = 1
+        buf = snip(buf, empty_buf, 1)
+
+        if type_data == CONST_SQL_TYPE_DATA_SQL_Null then
+            -- noop
+        elseif sql_type == CONST_SQL_SQL_TYPE_null then
+            -- noop
+        elseif sql_type == CONST_SQL_SQL_TYPE_text then
+            local parsed_bytes = parse_String("content", buf, empty_buf, element_tree)
+            if parsed_bytes == -1 then
+                return -1
+            end
+            consumed_bytes = consumed_bytes + parsed_bytes
+        elseif sql_type == CONST_SQL_SQL_TYPE_int then
+            if type_data == CONST_SQL_TYPE_DATA_SQL_Int8 then
+                return -1 -- FIXME Not implemented
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Int16 then
+                return -1 -- FIXME Not implemented
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Int32 then
+                local parsed_bytes = parse_i32("content", buf, empty_buf, element_tree)
+                if parsed_bytes == -1 then return -1 end
+                consumed_bytes = consumed_bytes + parsed_bytes
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Int64 then
+                local parsed_bytes = parse_u64("content", buf, empty_buf, element_tree) -- FIXME should be signed
+                if parsed_bytes == -1 then return -1 end
+                consumed_bytes = consumed_bytes + parsed_bytes
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Uint8 then
+                return -1 -- FIXME Not implemented
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Uint16 then
+                return -1 -- FIXME Not implemented
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Uint32 then
+                local parsed_bytes = parse_u32("content", buf, empty_buf, element_tree)
+                if parsed_bytes == -1 then return -1 end
+                consumed_bytes = consumed_bytes + parsed_bytes
+            elseif type_data == CONST_SQL_TYPE_DATA_SQL_Uint64 then
+                local parsed_bytes = parse_u64("content", buf, empty_buf, element_tree)
+                if parsed_bytes == -1 then return -1 end
+                consumed_bytes = consumed_bytes + parsed_bytes
+            end
+        elseif sql_type == CONST_SQL_SQL_TYPE_float then
+            local parsed_bytes = parse_float("content", buf, empty_buf, element_tree)
+            if parsed_bytes == -1 then return -1 end
+            consumed_bytes = consumed_bytes + parsed_bytes
+        elseif sql_type == CONST_SQL_SQL_TYPE_bool then
+            local parsed_bytes = parse_bool("content", buf, empty_buf, element_tree)
+            if parsed_bytes == -1 then return -1 end
+            consumed_bytes = consumed_bytes + parsed_bytes
+        elseif sql_type == CONST_SQL_SQL_TYPE_tuple then
+            local parsed_bytes = parse_Vector_SQL_Value("content", buf, empty_buf, element_tree)
+            if parsed_bytes == -1 then return -1 end
+            consumed_bytes = consumed_bytes + parsed_bytes
+        else
+            -- Not recognized, give up
+            return -1
+        end
+
+        element_tree:set_len(consumed_bytes)
+        return consumed_bytes
+    end
+
     f.type_sbm = ProtoField.bytes("ipc.type.sbm", "Gfx::ShareableBitmap")
     local tab_bitmap_format = {
         [0] = "Invalid",
