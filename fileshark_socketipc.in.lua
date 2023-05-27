@@ -206,6 +206,17 @@ do
     --TYPEIMPL:int
     local parse_int = parse_i32
 
+    f.type_u64 = ProtoField.uint64("ipc.type.u64", "value")
+    local function parse_u64(param_name, buf, empty_buf, tree)
+        --TYPEIMPL:u64
+        -- FIXME: Deal with insufficiently small buffers
+        local param_tree = tree:add_le(f.type_u64, buf(0, 8))
+        param_tree:prepend_text(string.format("%s: ", param_name))
+        return 8
+    end
+    --TYPEIMPL:size_t
+    local parse_size_t = parse_u64
+
     f.type_int_rect = ProtoField.bytes("ipc.type.int_rect", "Gfx::IntRect")
     local function parse_Gfx_IntRect(param_name, buf, empty_buf, tree)
         --TYPEIMPL:Gfx_IntRect
