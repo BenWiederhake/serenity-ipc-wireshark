@@ -379,7 +379,6 @@ do
         buf = snip(buf, empty_buf, 4)
         local message = tree:add(message_ctx.type_field, buf)
 
-        -- FIXME: Parse 'message' according to 'message_ctx.parameters'
         local broke = false;
         for _, param in ipairs(message_ctx.parameters) do
             local parse_fn = param.parse_fn or parse_unimpl;
@@ -392,8 +391,8 @@ do
             end
         end
 
-        if not broke and buf:len() > 0 then
-            tree:add(f.unexpected_padding, message)
+        if buf:len() > 0 then
+            tree:add(f.unexpected_padding, buf)
         end
     end
 
