@@ -17,7 +17,7 @@ do
     f.unimpl_params = ProtoField.bytes("ipc.unimpl", "Unimplemented parameters")
     f.unexpected_padding = ProtoField.bytes("ipc.unexpected_padding", "Unexpected padding")
     f.direction = ProtoField.uint32("ipc.direction", "Direction", base.DEC, tab_directions)
-    f.message = ProtoField.bytes("ipc.message", "Actual on-wire message content (minus leading message size)")
+    f.message = ProtoField.none("ipc.message", "Actual on-wire message content (minus leading message size)")
     -- FIXME: Bad format?! DEC=decimal, HEX=hex, DEC_HEX=deconly, HEX_DEC=hexonly???
     f.endpoint = ProtoField.uint32("ipc.msg.endpoint", "Endpoint magic", base.HEX_DEC, tab_endpoints)
 
@@ -45,7 +45,7 @@ do
 
     f.str_buf = ProtoField.string("ipc.type.str", "String content", base.UNICODE)
     f.str_len = ProtoField.uint32("ipc.type.str.len", "String length", base.DEC)
-    f.str_null = ProtoField.bytes("ipc.type.str.null", "String NULL", base.NONE)
+    f.str_null = ProtoField.none("ipc.type.str.null", "String NULL", base.NONE)
     local function parse_DeprecatedString(param_name, buf, empty_buf, tree)
         --TYPEIMPL:DeprecatedString
         -- FIXME: Deal with insufficiently small buffers
@@ -94,7 +94,7 @@ do
         return consumed_bytes
     end
 
-    f.optional = ProtoField.bytes("ipc.type.opt", "Optional<...>::None", base.NONE)
+    f.optional = ProtoField.none("ipc.type.opt", "Optional<...>::None", base.NONE)
     local function helper_parse_Optional(param_name, buf, empty_buf, tree, parse_element_fn)
         -- FIXME: Deal with insufficiently small buffers
         local orig_buf = buf(0,1)
@@ -116,7 +116,7 @@ do
         return consumed_bytes
     end
 
-    f.hashmap_generic = ProtoField.bytes("ipc.type.hashmap", "HashMap<...>", base.NONE)
+    f.hashmap_generic = ProtoField.none("ipc.type.hashmap", "HashMap<...>", base.NONE)
     local function helper_parse_HashMap(param_name, buf, empty_buf, tree, parse_key_fn, parse_value_fn)
         -- FIXME: Deal with insufficiently small buffers
         local num_elements = buf(0,4):le_uint()
@@ -154,7 +154,7 @@ do
         return 1
     end
 
-    f.type_file = ProtoField.bytes("ipc.type.file", "File (contents aren't logged)")
+    f.type_file = ProtoField.none("ipc.type.file", "File (contents aren't logged)")
     local function parse_IPC_File(param_name, buf, empty_buf, tree)
         --TYPEIMPL:IPC_File
         -- FIXME: Deal with insufficiently small buffers
@@ -163,7 +163,7 @@ do
         return 0
     end
 
-    f.type_anon_buf = ProtoField.bytes("ipc.type.anon_buf", "Core::AnonymousBuffer")
+    f.type_anon_buf = ProtoField.none("ipc.type.anon_buf", "Core::AnonymousBuffer")
     f.type_anon_buf_validity = ProtoField.bool("ipc.type.anon_buf.valid", "valid")
     f.type_anon_buf_size = ProtoField.uint32("ipc.type.anon_buf.size", "size")
     local function parse_Core_AnonymousBuffer(param_name, buf, empty_buf, tree)
@@ -217,7 +217,7 @@ do
     --TYPEIMPL:size_t
     local parse_size_t = parse_u64
 
-    f.type_int_rect = ProtoField.bytes("ipc.type.int_rect", "Gfx::IntRect")
+    f.type_int_rect = ProtoField.none("ipc.type.int_rect", "Gfx::IntRect")
     local function parse_Gfx_IntRect(param_name, buf, empty_buf, tree)
         --TYPEIMPL:Gfx_IntRect
         -- FIXME: Deal with insufficiently small buffers
@@ -239,7 +239,7 @@ do
         return 4
     end
 
-    f.type_int_size = ProtoField.bytes("ipc.type.int_size", "Gfx::IntSize")
+    f.type_int_size = ProtoField.none("ipc.type.int_size", "Gfx::IntSize")
     local function parse_Gfx_IntSize(param_name, buf, empty_buf, tree)
         --TYPEIMPL:Gfx_IntSize
         -- FIXME: Deal with insufficiently small buffers
@@ -250,7 +250,7 @@ do
         return 8
     end
 
-    f.type_int_point = ProtoField.bytes("ipc.type.int_point", "Gfx::IntPoint")
+    f.type_int_point = ProtoField.none("ipc.type.int_point", "Gfx::IntPoint")
     local function parse_Gfx_IntPoint(param_name, buf, empty_buf, tree)
         --TYPEIMPL:Gfx_IntPoint
         -- FIXME: Deal with insufficiently small buffers
@@ -261,7 +261,6 @@ do
         return 8
     end
 
-    -- FIXME: Use "none" more often?
     f.type_sql = ProtoField.none("ipc.type.sql", "SQL::Value")
     -- Wireshark already unshifts the value for us.
     -- In a way that's nice and helpful, but it also means we have to intentionally desync from the C++ implementation.
@@ -374,7 +373,7 @@ do
         return consumed_bytes
     end
 
-    f.type_sbm = ProtoField.bytes("ipc.type.sbm", "Gfx::ShareableBitmap")
+    f.type_sbm = ProtoField.none("ipc.type.sbm", "Gfx::ShareableBitmap")
     local tab_bitmap_format = {
         [0] = "Invalid",
         [1] = "Indexed1",
@@ -446,7 +445,7 @@ do
     --     [2] = "ConfigClient::NotifyChangedI32Value",
     -- })
     -- endpoint_info[1419546125] = {type_field=f.ep_1419546125_type, types={}}
-    -- f.ep_1419546125_2_content = ProtoField.bytes("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
+    -- f.ep_1419546125_2_content = ProtoField.none("ipc.msg.msg_type_1419546125_2", "ConfigClient::NotifyChangedI32Value")
     -- endpoint_info[1419546125].types[2] = {type_field=f.ep_1419546125_2_content, parameters={
     --     {name="domain", parse_fn=parse_DeprecatedString},
     --     {name="group", parse_fn=parse_DeprecatedString},
