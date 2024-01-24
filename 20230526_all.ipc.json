@@ -1,0 +1,7524 @@
+[
+  {
+    "name": "NotificationServer",
+    "magic": 2714249765,
+    "includes": [
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": [
+      {
+        "name": "show_notification",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "icon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "update_notification_text",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "still_showing",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_notification_icon",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "icon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "still_showing",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_showing",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "still_showing",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "close_notification",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": []
+      }
+    ]
+  },
+  {
+    "name": "RequestClient",
+    "magic": 1502652576,
+    "includes": [
+      "#include <AK/URL.h>"
+    ],
+    "messages": [
+      {
+        "name": "request_progress",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "total_size",
+            "type": "Optional<u32>",
+            "attributes": []
+          },
+          {
+            "name": "downloaded_size",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "request_finished",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "total_size",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "headers_became_available",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "response_headers",
+            "type": "HashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "status_code",
+            "type": "Optional<u32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "certificate_requested",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "RequestServer",
+    "magic": 1270977860,
+    "includes": [
+      "#include <AK/URL.h>",
+      "#include <RequestServer/ConnectionCache.h>"
+    ],
+    "messages": [
+      {
+        "name": "is_supported_protocol",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "protocol",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "supported",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "start_request",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "method",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "request_headers",
+            "type": "HashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "request_body",
+            "type": "ByteBuffer",
+            "attributes": []
+          },
+          {
+            "name": "proxy_data",
+            "type": "Core::ProxyData",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "response_fd",
+            "type": "Optional<IPC::File>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "stop_request",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_certificate",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "certificate",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "ensure_connection",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "cache_level",
+            "type": "::RequestServer::CacheLevel",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WebContentClient",
+    "magic": 2565717604,
+    "includes": [
+      "#include <AK/URL.h>",
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/ShareableBitmap.h>",
+      "#include <LibWeb/Cookie/Cookie.h>",
+      "#include <LibWeb/Cookie/ParsedCookie.h>",
+      "#include <LibWeb/HTML/ActivateTab.h>"
+    ],
+    "messages": [
+      {
+        "name": "did_start_loading",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "is_redirect",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_finish_loading",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_navigate_back",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_navigate_forward",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_refresh",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_paint",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          },
+          {
+            "name": "bitmap_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_invalidate_content_rect",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_change_selection",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_cursor_change",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "cursor_type",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_layout",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_change_title",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_scroll",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "x_delta",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "y_delta",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_scroll_to",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "scroll_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_scroll_into_view",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_enter_tooltip_area",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_leave_tooltip_area",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_hover_link",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_unhover_link",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_click_link",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "target",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_middle_click_link",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "target",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_context_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_link_context_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "target",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_image_context_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "target",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_alert",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "message",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_confirm",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "message",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_prompt",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "message",
+            "type": "String",
+            "attributes": []
+          },
+          {
+            "name": "default_",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_set_prompt_text",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "message",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_accept_dialog",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_dismiss_dialog",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_get_source",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "source",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_get_dom_tree",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "dom_tree",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_get_dom_node_properties",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "node_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "computed_style",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "resolved_style",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "custom_properties",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "node_box_sizing_json",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_get_accessibility_tree",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "accessibility_tree",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_change_favicon",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "favicon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_all_cookies",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "cookies",
+            "type": "Vector<Web::Cookie::Cookie>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_named_cookie",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "cookie",
+            "type": "Optional<Web::Cookie::Cookie>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_cookie",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "source",
+            "type": "u8",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "cookie",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_set_cookie",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "cookie",
+            "type": "Web::Cookie::ParsedCookie",
+            "attributes": []
+          },
+          {
+            "name": "source",
+            "type": "u8",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_update_cookie",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "cookie",
+            "type": "Web::Cookie::Cookie",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_update_resource_count",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "count_waiting",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_new_tab",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "activate_tab",
+            "type": "Web::HTML::ActivateTab",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "handle",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_activate_tab",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_close_browsing_context",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_restore_window",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "did_request_reposition_window",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "window_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_resize_window",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "window_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_maximize_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "window_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_minimize_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "window_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_fullscreen_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "window_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_request_file",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "path",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_finish_handling_input_event",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "event_was_accepted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_output_js_console_message",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "message_index",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_get_js_console_messages",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "start_index",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "message_types",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "messages",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WebContentServer",
+    "magic": 4289017466,
+    "includes": [
+      "#include <AK/URL.h>",
+      "#include <LibIPC/File.h>",
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/Rect.h>",
+      "#include <LibGfx/ShareableBitmap.h>",
+      "#include <LibWeb/CSS/PreferredColorScheme.h>",
+      "#include <LibWeb/CSS/Selector.h>",
+      "#include <LibWeb/WebDriver/ExecuteScript.h>"
+    ],
+    "messages": [
+      {
+        "name": "get_window_handle",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "handle",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_handle",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "handle",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "connect_to_webdriver",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "webdriver_ipc_path",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_system_theme",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "theme_buffer",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_system_fonts",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "default_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "fixed_width_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "window_title_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_screen_rects",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          },
+          {
+            "name": "main_screen_index",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "load_url",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "load_html",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "html",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_backing_store",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "backing_store_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "remove_backing_store",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "backing_store_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "paint",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "content_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          },
+          {
+            "name": "backing_store_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_viewport_rect",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_down",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_move",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_up",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_wheel",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "doubleclick",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "key_down",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "key",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "code_point",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "key_up",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "key",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "unsigned",
+            "attributes": []
+          },
+          {
+            "name": "code_point",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "debug_request",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "argument",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_source",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "inspect_dom_tree",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "inspect_dom_node",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "node_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "pseudo_element",
+            "type": "Optional<Web::CSS::Selector::PseudoElement>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "has_style",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "computed_style",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "resolved_style",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "custom_properties",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "node_box_sizing",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "inspect_accessibility_tree",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "get_hovered_node_id",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "node_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "js_console_input",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "js_source",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "js_console_request_messages",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "start_index",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "take_document_screenshot",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "data",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "run_javascript",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "js_source",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "dump_layout_tree",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "dump",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_selected_text",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "selection",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "select_all",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "set_content_filters",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filters",
+            "type": "Vector<String>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_autoplay_allowed_on_all_websites",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "set_autoplay_allowlist",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "allowlist",
+            "type": "Vector<String>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_proxy_mappings",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "proxies",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "mappings",
+            "type": "HashMap<DeprecatedString,size_t>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_preferred_color_scheme",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "color_scheme",
+            "type": "Web::CSS::PreferredColorScheme",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_has_focus",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "has_focus",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_is_scripting_enabled",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "is_scripting_enabled",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_device_pixels_per_css_pixel",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "device_pixels_per_css_pixel",
+            "type": "float",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_position",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_size",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_local_storage_entries",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "entries",
+            "type": "OrderedHashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_session_storage_entries",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "entries",
+            "type": "OrderedHashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "handle_file_return",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "error",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "file",
+            "type": "Optional<IPC::File>",
+            "attributes": []
+          },
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_system_visibility_state",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "visible",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "alert_closed",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "confirm_closed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "accepted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "prompt_closed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "response",
+            "type": "Optional<String>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WebDriverServer",
+    "magic": 2244075654,
+    "includes": [],
+    "messages": []
+  },
+  {
+    "name": "WebDriverClient",
+    "magic": 4284153835,
+    "includes": [
+      "#include <LibWeb/WebDriver/Capabilities.h>",
+      "#include <LibWeb/WebDriver/Response.h>"
+    ],
+    "messages": [
+      {
+        "name": "close_session",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": []
+      },
+      {
+        "name": "set_page_load_strategy",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "page_load_strategy",
+            "type": "Web::WebDriver::PageLoadStrategy",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_unhandled_prompt_behavior",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "unhandled_prompt_behavior",
+            "type": "Web::WebDriver::UnhandledPromptBehavior",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_strict_file_interactability",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "strict_file_interactability",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_is_webdriver_active",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "active",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_timeouts",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_timeouts",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "navigate_to",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_current_url",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "back",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "forward",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "refresh",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_title",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_window_handle",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "handle",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "close_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "switch_to_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "new_window",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_window_rect",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_rect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "maximize_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "minimize_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "fullscreen_window",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_element",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_elements",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_element_from_element",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          },
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_elements_from_element",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          },
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_element_from_shadow_root",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          },
+          {
+            "name": "shadow_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_elements_from_shadow_root",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          },
+          {
+            "name": "shadow_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_active_element",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_shadow_root",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_element_selected",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_attribute",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_property",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_css_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_text",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_tag_name",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_element_rect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_element_enabled",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_computed_role",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_computed_label",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "element_click",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_source",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "execute_script",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "execute_async_script",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_all_cookies",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_named_cookie",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_cookie",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "delete_cookie",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "delete_all_cookies",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "dismiss_alert",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "accept_alert",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_alert_text",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "send_alert_text",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "payload",
+            "type": "JsonValue",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "take_screenshot",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "take_element_screenshot",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "element_id",
+            "type": "String",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "print_page",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "ensure_top_level_browsing_context_is_open",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "Web::WebDriver::Response",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "AudioServer",
+    "magic": 3887509455,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibAudio/Queue.h>"
+    ],
+    "messages": [
+      {
+        "name": "set_main_mix_muted",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "muted",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "is_main_mix_muted",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "muted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_self_muted",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "muted",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "is_self_muted",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "muted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_main_mix_volume",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_main_mix_volume",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "get_self_volume",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_self_volume",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "set_sample_rate",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "sample_rate",
+            "type": "u32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "get_sample_rate",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "sample_rate",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_buffer",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "buffer",
+            "type": "Audio::AudioQueue",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "clear_buffer",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "start_playback",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "pause_playback",
+        "is_sync": false,
+        "inputs": []
+      }
+    ]
+  },
+  {
+    "name": "AudioClient",
+    "magic": 1126638765,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>"
+    ],
+    "messages": [
+      {
+        "name": "main_mix_muted_state_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "muted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "main_mix_volume_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "client_volume_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "volume",
+            "type": "double",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ImageDecoderClient",
+    "magic": 945471142,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": []
+  },
+  {
+    "name": "ImageDecoderServer",
+    "magic": 3964467294,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": [
+      {
+        "name": "decode_image",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "data",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          },
+          {
+            "name": "mime_type",
+            "type": "Optional<DeprecatedString>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "is_animated",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "loop_count",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "bitmaps",
+            "type": "Vector<Gfx::ShareableBitmap>",
+            "attributes": []
+          },
+          {
+            "name": "durations",
+            "type": "Vector<u32>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SQLClient",
+    "magic": 531353361,
+    "includes": [
+      "#include <LibSQL/Result.h>",
+      "#include <LibSQL/Value.h>"
+    ],
+    "messages": [
+      {
+        "name": "execution_success",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "statement_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "execution_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "column_names",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "has_results",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "created",
+            "type": "size_t",
+            "attributes": []
+          },
+          {
+            "name": "updated",
+            "type": "size_t",
+            "attributes": []
+          },
+          {
+            "name": "deleted",
+            "type": "size_t",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "next_result",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "statement_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "execution_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "row",
+            "type": "Vector<SQL::Value>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "results_exhausted",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "statement_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "execution_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "total_rows",
+            "type": "size_t",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "execution_error",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "statement_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "execution_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "code",
+            "type": "SQL::SQLErrorCode",
+            "attributes": []
+          },
+          {
+            "name": "message",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "SQLServer",
+    "magic": 3731107876,
+    "includes": [
+      "#include <LibSQL/Value.h>"
+    ],
+    "messages": [
+      {
+        "name": "connect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "connection_id",
+            "type": "Optional<u64>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "prepare_statement",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "statement",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "statement_id",
+            "type": "Optional<u64>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "execute_statement",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "statement_id",
+            "type": "u64",
+            "attributes": []
+          },
+          {
+            "name": "placeholder_values",
+            "type": "Vector<SQL::Value>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "execution_id",
+            "type": "Optional<u64>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "disconnect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "u64",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      }
+    ]
+  },
+  {
+    "name": "WebSocketClient",
+    "magic": 3157685592,
+    "includes": [
+      "#include <AK/URL.h>"
+    ],
+    "messages": [
+      {
+        "name": "connected",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "received",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "is_text",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "data",
+            "type": "ByteBuffer",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "errored",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "message",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "closed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "code",
+            "type": "u16",
+            "attributes": []
+          },
+          {
+            "name": "reason",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "clean",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "certificate_requested",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WebSocketServer",
+    "magic": 1144104864,
+    "includes": [
+      "#include <AK/URL.h>"
+    ],
+    "messages": [
+      {
+        "name": "connect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "origin",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "protocols",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "extensions",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "additional_request_headers",
+            "type": "HashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "ready_state",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "ready_state",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "subprotocol_in_use",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "subprotocol_in_use",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "send",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "is_text",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "data",
+            "type": "ByteBuffer",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "close",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "code",
+            "type": "u16",
+            "attributes": []
+          },
+          {
+            "name": "reason",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_certificate",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "connection_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "certificate",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LookupServer",
+    "magic": 3613307456,
+    "includes": [],
+    "messages": [
+      {
+        "name": "lookup_name",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "code",
+            "type": "int",
+            "attributes": []
+          },
+          {
+            "name": "addresses",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "lookup_address",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "address",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "code",
+            "type": "int",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LookupClient",
+    "magic": 3540717142,
+    "includes": [],
+    "messages": []
+  },
+  {
+    "name": "WindowManagerClient",
+    "magic": 3317521970,
+    "includes": [
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": [
+      {
+        "name": "window_removed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_state_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_row",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_column",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "is_active",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "is_blocking",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "is_minimized",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "is_frameless",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "window_type",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          },
+          {
+            "name": "progress",
+            "type": "Optional<i32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_icon_bitmap_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_rect_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "applet_area_size_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "super_key_pressed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "super_space_key_pressed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "super_d_key_pressed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "super_digit_key_pressed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "digit",
+            "type": "u8",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "workspace_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "row",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "column",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "keymap_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "wm_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "keymap",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WindowManagerServer",
+    "magic": 471012077,
+    "includes": [
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": [
+      {
+        "name": "set_event_mask",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "event_mask",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_manager_window",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_active_window",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_minimized",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "minimized",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "toggle_show_desktop",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "start_window_resize",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "resize_direction",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "popup_window_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "screen_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_taskbar_rect",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_applet_area_position",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_workspace",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "row",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "column",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_keymap",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "keymap",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WindowServer",
+    "magic": 2938215075,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/ShareableBitmap.h>",
+      "#include <LibGfx/Color.h>"
+    ],
+    "messages": [
+      {
+        "name": "create_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "set_menu_name",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "name",
+            "type": "String",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "destroy_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_menu_item",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "submenu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "enabled",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "visible",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "checkable",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "checked",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "is_default",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "shortcut",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "icon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          },
+          {
+            "name": "exclusive",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_menu_separator",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_menu_item",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "submenu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "enabled",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "visible",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "checkable",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "checked",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "is_default",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "shortcut",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "icon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "remove_menu_item",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "flash_menubar_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "create_window",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          },
+          {
+            "name": "auto_position",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "has_alpha_channel",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "minimizable",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "closeable",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "resizable",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "fullscreen",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "frameless",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "forced_shadow",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "opacity",
+            "type": "float",
+            "attributes": []
+          },
+          {
+            "name": "alpha_hit_threshold",
+            "type": "float",
+            "attributes": []
+          },
+          {
+            "name": "base_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "size_increment",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "minimum_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "resize_aspect_ratio",
+            "type": "Optional<Gfx::IntSize>",
+            "attributes": []
+          },
+          {
+            "name": "type",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mode",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "parent_window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "launch_origin_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "destroy_window",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "destroyed_window_ids",
+            "type": "Vector<i32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_title",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "get_window_title",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "set_window_progress",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "progress",
+            "type": "Optional<i32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_modified",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "modified",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_window_modified",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "modified",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_rect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_window_rect",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_minimum_size",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_window_minimum_size",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_applet_rect_on_screen",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "start_window_resize",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "resize_direction",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_maximized",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "maximized",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_maximized",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "maximized",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_minimized",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "minimized",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_minimized",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "minimized",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "invalidate_rect",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          },
+          {
+            "name": "ignore_occlusion",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "did_finish_painting",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_global_mouse_tracking",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "enabled",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_opacity",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "opacity",
+            "type": "float",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_alpha_hit_threshold",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "threshold",
+            "type": "float",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_backing_store",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "bpp",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "pitch",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "anon_file",
+            "type": "IPC::File",
+            "attributes": []
+          },
+          {
+            "name": "serial",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "has_alpha_channel",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "visible_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "flush_immediately",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "set_window_has_alpha_channel",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "has_alpha_channel",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "move_window_to_front",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_fullscreen",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "fullscreen",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_frameless",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "frameless",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_forced_shadow",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "shadow",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "popup_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "screen_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "dismiss_menu",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_wallpaper",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "wallpaper_bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_background_color",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "background_color",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_wallpaper_mode",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "mode",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_screen_layout",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "screen_layout",
+            "type": "::WindowServer::ScreenLayout",
+            "attributes": []
+          },
+          {
+            "name": "save",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "error_msg",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_screen_layout",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "screen_layout",
+            "type": "::WindowServer::ScreenLayout",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "save_screen_layout",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "error_msg",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "show_screen_numbers",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "show",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "apply_workspace_settings",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "rows",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "columns",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "save",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_workspace_settings",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "rows",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "columns",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "max_rows",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "max_columns",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_icon_bitmap",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "icon",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_wallpaper",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "wallpaper_bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_cursor",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "cursor_type",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_custom_cursor",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "cursor",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "start_drag",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "mime_data",
+            "type": "HashMap<DeprecatedString,ByteBuffer>",
+            "attributes": []
+          },
+          {
+            "name": "drag_bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "started",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_accepts_drag",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "accepts",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_system_theme",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "theme_path",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "theme_name",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "keep_desktop_background",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "color_scheme_path",
+            "type": "Optional<DeprecatedString>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_system_theme",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "theme_name",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "refresh_system_theme",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "set_system_theme_override",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "buffer",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_system_theme_override",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "buffer",
+            "type": "Optional<Core::AnonymousBuffer>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "clear_system_theme_override",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "is_system_theme_overridden",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "overridden",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_preferred_color_scheme",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "path",
+            "type": "Optional<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "apply_cursor_theme",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_cursor_theme",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_cursor_highlight_radius",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "radius",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_cursor_highlight_radius",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "radius",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_cursor_highlight_color",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "color",
+            "type": "Gfx::Color",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_cursor_highlight_color",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "color",
+            "type": "Gfx::Color",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_system_fonts",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "default_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "fixed_width_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "window_title_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "success",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_system_effects",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "effects",
+            "type": "Vector<bool>",
+            "attributes": []
+          },
+          {
+            "name": "geometry",
+            "type": "u8",
+            "attributes": []
+          },
+          {
+            "name": "tile_window",
+            "type": "u8",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_base_size_and_size_increment",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "base_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "size_increment",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_resize_aspect_ratio",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "resize_aspect_ratio",
+            "type": "Optional<Gfx::IntSize>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "enable_display_link",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "disable_display_link",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "set_global_cursor_position",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_global_cursor_position",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_mouse_acceleration",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "factor",
+            "type": "float",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_mouse_acceleration",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "factor",
+            "type": "float",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_scroll_step_size",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "step_size",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_scroll_step_size",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "step_size",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_screen_bitmap",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "rect",
+            "type": "Optional<Gfx::IntRect>",
+            "attributes": []
+          },
+          {
+            "name": "screen_index",
+            "type": "Optional<u32>",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_screen_bitmap_around_cursor",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_screen_bitmap_around_location",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "location",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "bitmap",
+            "type": "Gfx::ShareableBitmap",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_color_under_cursor",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "color",
+            "type": "Optional<Gfx::Color>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "pong",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "set_double_click_speed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "speed",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_double_click_speed",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "speed",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_mouse_buttons_switched",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "switched",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "are_mouse_buttons_switched",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "switched",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_natural_scroll",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "inverted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "is_natural_scroll",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "inverted",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_desktop_display_scale",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "screen_index",
+            "type": "u32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "desktop_display_scale",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_flash_flush",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "enabled",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_window_parent_from_client",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "parent_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "child_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "get_window_rect_from_client",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_window_stealing_for_client",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "remove_window_stealing_for_client",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "remove_window_stealing",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "set_always_on_top",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "always_on_top",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      }
+    ]
+  },
+  {
+    "name": "WindowClient",
+    "magic": 3794023488,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>",
+      "#include <LibGfx/ShareableBitmap.h>"
+    ],
+    "messages": [
+      {
+        "name": "fast_greet",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "screen_rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          },
+          {
+            "name": "main_screen_index",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_rows",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_columns",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "theme_buffer",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          },
+          {
+            "name": "default_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "fixed_width_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "window_title_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "effects",
+            "type": "Vector<bool>",
+            "attributes": []
+          },
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "paint",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_size",
+            "type": "Gfx::IntSize",
+            "attributes": []
+          },
+          {
+            "name": "rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_move",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "is_drag",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "mime_types",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_down",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_y",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_double_click",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_y",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_up",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_y",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "mouse_wheel",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "button",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "buttons",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_delta_y",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_x",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "wheel_raw_delta_y",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_entered",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_left",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_input_preempted",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_input_restored",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "key_down",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "code_point",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "scancode",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "key_up",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "code_point",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "modifiers",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "scancode",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_activated",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_deactivated",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_state_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "minimized",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "maximized",
+            "type": "bool",
+            "attributes": []
+          },
+          {
+            "name": "occluded",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_close_request",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_resized",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "new_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "window_moved",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "new_rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "menu_item_activated",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "menu_item_entered",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "menu_item_left",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "identifier",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "menu_visibility_did_change",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "menu_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "visible",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "screen_rects_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "rects",
+            "type": "Vector<Gfx::IntRect>",
+            "attributes": []
+          },
+          {
+            "name": "main_screen_index",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_rows",
+            "type": "u32",
+            "attributes": []
+          },
+          {
+            "name": "workspace_columns",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "applet_area_rect_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "rect",
+            "type": "Gfx::IntRect",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "drag_accepted",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "drag_cancelled",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "drag_dropped",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          },
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "mime_data",
+            "type": "HashMap<DeprecatedString,ByteBuffer>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_system_theme",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "theme_buffer",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_system_fonts",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "default_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "fixed_width_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "window_title_font_query",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "update_system_effects",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "effects",
+            "type": "Vector<bool>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "display_link_notification",
+        "is_sync": false,
+        "inputs": []
+      },
+      {
+        "name": "track_mouse_move",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "mouse_position",
+            "type": "Gfx::IntPoint",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "ping",
+        "is_sync": false,
+        "inputs": []
+      }
+    ]
+  },
+  {
+    "name": "ClipboardClient",
+    "magic": 4008793515,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>"
+    ],
+    "messages": [
+      {
+        "name": "clipboard_data_changed",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "mime_type",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ClipboardServer",
+    "magic": 1329211611,
+    "includes": [
+      "#include <LibCore/AnonymousBuffer.h>"
+    ],
+    "messages": [
+      {
+        "name": "get_clipboard_data",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "data",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          },
+          {
+            "name": "mime_type",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "metadata",
+            "type": "HashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_clipboard_data",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "data",
+            "type": "Core::AnonymousBuffer",
+            "attributes": []
+          },
+          {
+            "name": "mime_type",
+            "type": "DeprecatedString",
+            "attributes": [
+              "UTF8"
+            ]
+          },
+          {
+            "name": "metadata",
+            "type": "HashMap<DeprecatedString,DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "FileSystemAccessServer",
+    "magic": 729082329,
+    "includes": [
+      "#include <AK/URL.h>",
+      "#include <LibGUI/FileTypeFilter.h>"
+    ],
+    "messages": [
+      {
+        "name": "request_file_read_only_approved",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_server_client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "path",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "request_file",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_server_client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "path",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "requested_access",
+            "type": "Core::File::OpenMode",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "prompt_open_file",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_server_client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_title",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "path_to_view",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "requested_access",
+            "type": "Core::File::OpenMode",
+            "attributes": []
+          },
+          {
+            "name": "allowed_file_types",
+            "type": "Optional<Vector<GUI::FileTypeFilter>>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "prompt_save_file",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_server_client_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "window_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "title",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "ext",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "path_to_view",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "requested_access",
+            "type": "Core::File::OpenMode",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "expose_window_server_client_id",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "client_id",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "FileSystemAccessClient",
+    "magic": 3747304165,
+    "includes": [],
+    "messages": [
+      {
+        "name": "handle_prompt_end",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "request_id",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "error",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "fd",
+            "type": "Optional<IPC::File>",
+            "attributes": []
+          },
+          {
+            "name": "chosen_file",
+            "type": "Optional<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LaunchClient",
+    "magic": 1706997054,
+    "includes": [
+      "#include <AK/URL.h>"
+    ],
+    "messages": []
+  },
+  {
+    "name": "LaunchServer",
+    "magic": 1140813104,
+    "includes": [
+      "#include <AK/URL.h>"
+    ],
+    "messages": [
+      {
+        "name": "open_url",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          },
+          {
+            "name": "handler_name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "response",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_handlers_for_url",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "handlers",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_handlers_with_details_for_url",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "handlers_details",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "add_allowed_url",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "url",
+            "type": "URL",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "add_allowed_handler_with_any_url",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "handler_name",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "add_allowed_handler_with_only_specific_urls",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "handler_name",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "urls",
+            "type": "Vector<URL>",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "seal_allowlist",
+        "is_sync": true,
+        "inputs": [],
+        "outputs": []
+      }
+    ]
+  },
+  {
+    "name": "ConfigClient",
+    "magic": 1419546125,
+    "includes": [],
+    "messages": [
+      {
+        "name": "notify_changed_string_value",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_changed_i32_value",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_changed_u32_value",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "u32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_changed_bool_value",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "bool",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_removed_key",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_removed_group",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "notify_added_group",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ConfigServer",
+    "magic": 252595060,
+    "includes": [],
+    "messages": [
+      {
+        "name": "pledge_domains",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domains",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "monitor_domain",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "list_config_groups",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "groups",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "list_config_keys",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "keys",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "read_string_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "value",
+            "type": "Optional<DeprecatedString>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "read_i32_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "value",
+            "type": "Optional<i32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "read_u32_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "value",
+            "type": "Optional<u32>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "read_bool_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": [
+          {
+            "name": "value",
+            "type": "Optional<bool>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "write_string_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "write_i32_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "i32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "write_u32_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "u32",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "write_bool_value",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "value",
+            "type": "bool",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "remove_key_entry",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "key",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "remove_group_entry",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "add_group_entry",
+        "is_sync": true,
+        "inputs": [
+          {
+            "name": "domain",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "group",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ],
+        "outputs": []
+      }
+    ]
+  },
+  {
+    "name": "LanguageServer",
+    "magic": 3294800782,
+    "includes": [],
+    "messages": [
+      {
+        "name": "greet",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "project_root",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "file_opened",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "file",
+            "type": "IPC::File",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "file_edit_insert_text",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "text",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "start_line",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "start_column",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "file_edit_remove_text",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "start_line",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "start_column",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "end_line",
+            "type": "i32",
+            "attributes": []
+          },
+          {
+            "name": "end_column",
+            "type": "i32",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "set_file_content",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "content",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "auto_complete_suggestions",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "location",
+            "type": "CodeComprehension::ProjectLocation",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "find_declaration",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "location",
+            "type": "CodeComprehension::ProjectLocation",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_parameters_hint",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "location",
+            "type": "CodeComprehension::ProjectLocation",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "get_tokens_info",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "LanguageClient",
+    "magic": 114752332,
+    "includes": [],
+    "messages": [
+      {
+        "name": "auto_complete_suggestions",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "suggestions",
+            "type": "Vector<CodeComprehension::AutocompleteResultEntry>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "declaration_location",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "location",
+            "type": "CodeComprehension::ProjectLocation",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "declarations_in_document",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "declarations",
+            "type": "Vector<CodeComprehension::Declaration>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "todo_entries_in_document",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "filename",
+            "type": "DeprecatedString",
+            "attributes": []
+          },
+          {
+            "name": "todo_entries",
+            "type": "Vector<CodeComprehension::TodoEntry>",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "parameters_hint_result",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "params",
+            "type": "Vector<DeprecatedString>",
+            "attributes": []
+          },
+          {
+            "name": "current_index",
+            "type": "int",
+            "attributes": []
+          }
+        ]
+      },
+      {
+        "name": "tokens_info_result",
+        "is_sync": false,
+        "inputs": [
+          {
+            "name": "tokens_info",
+            "type": "Vector<CodeComprehension::TokenInfo>",
+            "attributes": []
+          }
+        ]
+      }
+    ]
+  }
+]

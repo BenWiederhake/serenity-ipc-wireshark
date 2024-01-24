@@ -16,6 +16,7 @@ Other files:
 - `compile_and_run.sh`: Wrapper that invokes Wireshark on the newly-assembled file
 - `*.pcap.hex`: Some hand-crafted example files
 - `*_ipc_traffic.tar.gz`: Some actual traces that mostly work
+- `20230526_all.ipc.json`: If you cannot get the `make…` patches to work, this should be a reasonably outdated version of `all.ipc.json`.
 
 This is an incomplete project that I'm only sharing because someone else wanted to take it further. Go ahead, friend! :)
 

@@ -1,0 +1,26 @@
+From 6861844ba0ff2eb8caa6aab9459a9eb8a91b9efc Mon Sep 17 00:00:00 2001
+From: Ben Wiederhake <BenWiederhake.GitHub@gmx.de>
+Date: Thu, 25 May 2023 23:28:32 +0200
+Subject: [PATCH 2/4] TextEditor: Permit writing IPC traffic dumps
+
+---
+ Userland/Applications/TextEditor/main.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Userland/Applications/TextEditor/main.cpp b/Userland/Applications/TextEditor/main.cpp
+index 11cab94012..07dbb36cd9 100644
+--- a/Userland/Applications/TextEditor/main.cpp
++++ b/Userland/Applications/TextEditor/main.cpp
+@@ -37,6 +37,9 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
+     TRY(Core::System::unveil("/tmp/session/%sid/portal/launch", "rw"));
+     TRY(Core::System::unveil("/tmp/session/%sid/portal/webcontent", "rw"));
+     TRY(Core::System::unveil("/tmp/session/%sid/portal/filesystemaccess", "rw"));
++    if (getenv("DUMP_LIBIPC_TRAFFIC")) {
++        TRY(Core::System::unveil("/tmp/", "crw"));
++    }
+     TRY(Core::System::unveil(nullptr, nullptr));
+ 
+     auto app_icon = GUI::Icon::default_icon("app-text-editor"sv);
+-- 
+2.43.0
+

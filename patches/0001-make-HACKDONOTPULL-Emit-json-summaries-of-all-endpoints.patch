@@ -1,0 +1,139 @@
+From c21ecf4e850a2b37646cb051073efec7023d1814 Mon Sep 17 00:00:00 2001
+From: Ben Wiederhake <BenWiederhake.GitHub@gmx.de>
+Date: Sun, 14 May 2023 20:33:32 +0200
+Subject: [PATCH 1/2] HACKDONOTPULL: Emit json summaries of all endpoints
+
+---
+ .gitignore                                    |  1 +
+ .../Tools/CodeGenerators/IPCCompiler/main.cpp | 60 +++++++++++++++++++
+ Meta/build-ipc-json.sh                        | 24 ++++++++
+ 3 files changed, 85 insertions(+)
+ create mode 100755 Meta/build-ipc-json.sh
+
+diff --git a/.gitignore b/.gitignore
+index ceec30fd73..e40d6bf687 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -31,3 +31,4 @@ sync-local.sh
+ 
+ Userland/Libraries/LibWasm/Tests/Fixtures/SpecTests
+ Userland/Libraries/LibWasm/Tests/Spec
++*.ipc.json
+diff --git a/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp b/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
+index f03f5a571b..5fbae5c31a 100644
+--- a/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
++++ b/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
+@@ -8,6 +8,7 @@
+ #include <AK/Function.h>
+ #include <AK/GenericLexer.h>
+ #include <AK/HashMap.h>
++#include <AK/JsonObjectSerializer.h>
+ #include <AK/SourceGenerator.h>
+ #include <AK/StringBuilder.h>
+ #include <LibCore/File.h>
+@@ -789,6 +790,63 @@ void build(StringBuilder& builder, Vector<Endpoint> const& endpoints)
+         build_endpoint(generator.fork(), endpoint);
+ }
+ 
++static ErrorOr<void> emit_json(Vector<Endpoint> const& endpoints, StringView input_filename)
++{
++    StringBuilder builder;
++    auto out = TRY(JsonArraySerializer<>::try_create(builder));
++    for (auto& endpoint : endpoints) {
++        auto endpoint_out = TRY(out.add_object());
++        TRY(endpoint_out.add("name"sv, endpoint.name));
++        TRY(endpoint_out.add("magic"sv, endpoint.magic));
++        auto includes_out = TRY(endpoint_out.add_array("includes"sv));
++        for (auto& include : endpoint.includes)
++            TRY(includes_out.add(include));
++        TRY(includes_out.finish());
++        auto messages_out = TRY(endpoint_out.add_array("messages"sv));
++        for (auto& message : endpoint.messages) {
++            auto message_out = TRY(messages_out.add_object());
++            TRY(message_out.add("name"sv, message.name));
++            TRY(message_out.add("is_sync"sv, message.is_synchronous));
++
++            auto inputs_out = TRY(message_out.add_array("inputs"sv));
++            for (auto& parameter : message.inputs) {
++                auto input_out = TRY(inputs_out.add_object());
++                TRY(input_out.add("name"sv, parameter.name));
++                TRY(input_out.add("type"sv, parameter.type));
++                auto attr_out = TRY(input_out.add_array("attributes"sv));
++                for (auto& attr : parameter.attributes)
++                    TRY(attr_out.add(attr));
++                TRY(attr_out.finish());
++                TRY(input_out.finish());
++            }
++            TRY(inputs_out.finish());
++            if (message.is_synchronous) {
++                auto outputs_out = TRY(message_out.add_array("inputs"sv));
++                for (auto& parameter : message.outputs) {
++                    auto output_out = TRY(outputs_out.add_object());
++                    TRY(output_out.add("name"sv, parameter.name));
++                    TRY(output_out.add("type"sv, parameter.type));
++                    auto attr_out = TRY(output_out.add_array("attributes"sv));
++                    for (auto& attr : parameter.attributes)
++                        TRY(attr_out.add(attr));
++                    TRY(attr_out.finish());
++                    TRY(output_out.finish());
++                }
++                TRY(outputs_out.finish());
++            }
++            TRY(message_out.finish());
++        }
++        TRY(messages_out.finish());
++        TRY(endpoint_out.finish());
++    }
++    TRY(out.finish());
++
++    auto json_filename = DeprecatedString::formatted("{}.json", input_filename);
++    auto file = TRY(Core::File::open(json_filename, Core::File::OpenMode::Write));
++    TRY(file->write_until_depleted(builder.to_deprecated_string().bytes()));
++    return {};
++}
++
+ ErrorOr<int> serenity_main(Main::Arguments arguments)
+ {
+     if (arguments.argc != 2) {
+@@ -802,6 +860,8 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
+ 
+     auto endpoints = parse(file_contents);
+ 
++    TRY(emit_json(endpoints, arguments.strings[1]));
++
+     StringBuilder builder;
+     build(builder, endpoints);
+ 
+diff --git a/Meta/build-ipc-json.sh b/Meta/build-ipc-json.sh
+new file mode 100755
+index 0000000000..33b43902a2
+--- /dev/null
++++ b/Meta/build-ipc-json.sh
+@@ -0,0 +1,24 @@
++#!/bin/bash
++
++set -e
++
++if [ -z "$SERENITY_SOURCE_DIR" ]
++then
++    SERENITY_SOURCE_DIR="$(git rev-parse --show-toplevel)"
++fi
++cd "$SERENITY_SOURCE_DIR"
++
++if ! diff <(git ls-files '*.ipc') <(find . -name '*.ipc.json' -print | sed -Ee 's,\./(.+)\.json,\1,' | sort); then
++    echo "ERROR: List of .ipc and .ipc.json files differ. Re-run serenity.sh build!"
++    exit 1
++fi
++if ! which jq >/dev/null; then
++    echo "ERROR: No 'jq' installed."
++    exit 1
++fi
++
++find . -name '*.ipc.json' -print0 | xargs -0 cat | jq '[ inputs | .[0] ]' > all.ipc.json
++echo "Output written to all.ipc.json"
++
++# For example, rank all types by popularity:
++# jq -r '.[].messages | .[] | (.inputs, .outputs?) | select(.) | .[].type' < all.ipc.json | sort | uniq -c | sort -rn
+-- 
+2.43.0
+

@@ -1,0 +1,39 @@
+From cf13d3a8a521f5e727fd7a80d9124375ed7b44a1 Mon Sep 17 00:00:00 2001
+From: Ben Wiederhake <BenWiederhake.GitHub@gmx.de>
+Date: Wed, 17 May 2023 00:02:27 +0200
+Subject: [PATCH 2/2] Fixup: LibIPC ipc.json export
+
+---
+ Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp | 2 +-
+ Meta/build-ipc-json.sh                               | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp b/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
+index 5fbae5c31a..3bf5188c8e 100644
+--- a/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
++++ b/Meta/Lagom/Tools/CodeGenerators/IPCCompiler/main.cpp
+@@ -821,7 +821,7 @@ static ErrorOr<void> emit_json(Vector<Endpoint> const& endpoints, StringView inp
+             }
+             TRY(inputs_out.finish());
+             if (message.is_synchronous) {
+-                auto outputs_out = TRY(message_out.add_array("inputs"sv));
++                auto outputs_out = TRY(message_out.add_array("outputs"sv));
+                 for (auto& parameter : message.outputs) {
+                     auto output_out = TRY(outputs_out.add_object());
+                     TRY(output_out.add("name"sv, parameter.name));
+diff --git a/Meta/build-ipc-json.sh b/Meta/build-ipc-json.sh
+index 33b43902a2..1929d96b6c 100755
+--- a/Meta/build-ipc-json.sh
++++ b/Meta/build-ipc-json.sh
+@@ -8,7 +8,7 @@ then
+ fi
+ cd "$SERENITY_SOURCE_DIR"
+ 
+-if ! diff <(git ls-files '*.ipc') <(find . -name '*.ipc.json' -print | sed -Ee 's,\./(.+)\.json,\1,' | sort); then
++if ! diff <(git ls-files '*.ipc') <(find . -name '*.ipc.json' ! -name 'all.ipc.json' -print | sed -Ee 's,\./(.+)\.json,\1,' | sort); then
+     echo "ERROR: List of .ipc and .ipc.json files differ. Re-run serenity.sh build!"
+     exit 1
+ fi
+-- 
+2.43.0
+

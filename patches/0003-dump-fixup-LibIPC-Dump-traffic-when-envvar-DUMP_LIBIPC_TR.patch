@@ -1,0 +1,29 @@
+From 5bbc1c64d57aadbdf4faa5e04f0649372eb80202 Mon Sep 17 00:00:00 2001
+From: Ben Wiederhake <BenWiederhake.GitHub@gmx.de>
+Date: Thu, 25 May 2023 23:47:30 +0200
+Subject: [PATCH 3/4] fixup! LibIPC: Dump traffic when envvar
+ DUMP_LIBIPC_TRAFFIC is set
+
+---
+ Userland/Libraries/LibIPC/TrafficDump.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Userland/Libraries/LibIPC/TrafficDump.cpp b/Userland/Libraries/LibIPC/TrafficDump.cpp
+index 47a529e1d6..247079eb7d 100644
+--- a/Userland/Libraries/LibIPC/TrafficDump.cpp
++++ b/Userland/Libraries/LibIPC/TrafficDump.cpp
+@@ -17,7 +17,11 @@ namespace IPC {
+ 
+ Optional<TrafficDump> TrafficDump::create_if_requested(Stub const& stub)
+ {
++#if defined(AK_OS_SERENITY)
++    if (!secure_getenv("DUMP_LIBIPC_TRAFFIC")) {
++#else
+     if (!getenv("DUMP_LIBIPC_TRAFFIC")) {
++#endif
+         return {};
+     }
+     // This method is being called from the constructor of `ConnectionBase`.
+-- 
+2.43.0
+
