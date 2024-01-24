@@ -1,0 +1,1 @@
+./hydrate_lua.py && wireshark -X lua_script:fileshark_socketipc.lua browser_ipc_traffic/WebContentClient_pid45_t1685120675_gahncz.pcap
